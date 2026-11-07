@@ -1,6 +1,32 @@
 @Nomina_back_end_HostAddress = http://localhost:5288
 
-GET {{Nomina_back_end_HostAddress}}/weatherforecast/
-Accept: application/json
+### Verificar conexión a Mongo
+GET {{Nomina_back_end_HostAddress}}/api/health/mongodb
 
-###
+### Crear usuario RR.HH.
+POST {{Nomina_back_end_HostAddress}}/api/usuarios
+Content-Type: application/json
+
+{
+  "identificacion": "1-1111-1111",
+  "nombre": "Admin RRHH",
+  "correo": "rrhh@techsolutions.com",
+  "rol": "RRHH",
+  "departamentoId": "665f1c2a9b1e8a3d4c5e6f70",
+  "puesto": "Encargado de Nómina",
+  "jefaturaDirectaId": null,
+  "fechaIngreso": "2024-01-15",
+  "salarioBase": 850000,
+  "tipoJornada": "Diurna",
+  "horario": {
+    "horaEntrada": "08:00",
+    "horaSalida": "17:00",
+    "diasLaborales": [1, 2, 3, 4, 5]
+  },
+  "fotoUrl": null,
+  "password": "Admin12345"
+}
+
+### Listar usuarios
+GET {{Nomina_back_end_HostAddress}}/api/usuarios
+Accept: application/json
