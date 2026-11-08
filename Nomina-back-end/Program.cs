@@ -14,6 +14,14 @@ builder.Services.AddSingleton<UsuarioRepository>();
 
 builder.Services.AddScoped<UsuarioService>();
 
+builder.Services.AddSingleton<DepartamentoRepository>();
+
+builder.Services.AddScoped<DepartamentoService>();
+
+builder.Services.AddSingleton<AsistenciaRepository>();
+
+builder.Services.AddScoped<AsistenciaService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
