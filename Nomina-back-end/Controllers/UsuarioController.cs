@@ -8,7 +8,7 @@ namespace Nomina_back_end.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize(Roles = Roles.RRHH)]
+[Authorize(Roles = Roles.RRHH)]
 public class UsuariosController : ControllerBase
 {
     private readonly UsuarioService _service;

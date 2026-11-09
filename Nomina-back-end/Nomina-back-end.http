@@ -30,3 +30,48 @@ Content-Type: application/json
 ### Listar usuarios
 GET {{Nomina_back_end_HostAddress}}/api/usuarios
 Accept: application/json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Login
+# @name login
+POST {{Nomina_back_end_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "correo": "rrhh@techsolutions.com",
+  "password": "Admin12345"
+}
+
+### Listar usuarios (con token)
+GET {{Nomina_back_end_HostAddress}}/api/usuarios
+Authorization: Bearer {{login.response.body.$.token}}
+
+
+### Debug auth
+GET https://localhost:7296/debug/auth
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZhZWVhNDU0ZjcyODRjYjdjMDQ4ZDcwOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJBZG1pbiBSUkhIIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicnJoaEB0ZWNoc29sdXRpb25zLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJSSEgiLCJleHAiOjE3OTQyNTIxMTUsImlzcyI6Ik5vbWluYVByby5BUEkiLCJhdWQiOiJOb21pbmFQcm8uRnJvbnRlbmQifQ.P4w_kX-C_jqZcJrHMIeW7tXLierrqZ5v9fQqmqOcmlk
+
+
+
+
+
+antes d
+
+
+
+
+
+
+
