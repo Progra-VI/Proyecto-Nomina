@@ -19,6 +19,15 @@ builder.Services.AddScoped<DepartamentoService>();
 builder.Services.AddSingleton<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 
+builder.Services.AddSingleton<TipoPermisoRepository>();
+builder.Services.AddScoped<TipoPermisoService>();
+
+builder.Services.AddSingleton<TipoHoraExtraRepository>();
+builder.Services.AddScoped<TipoHoraExtraService>();
+
+builder.Services.AddSingleton<MotivoLiquidacionRepository>();
+builder.Services.AddScoped<MotivoLiquidacionService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
@@ -66,6 +75,27 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
             ClockSkew = TimeSpan.Zero
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var h = ctx.Request.Headers.Authorization.ToString();
+                Console.WriteLine($"JWT recibido: {ctx.Request.Method} {ctx.Request.Path} | header: {h.Length} chars | empieza con: '{(h.Length > 15 ? h[..15] : h)}'");
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine("JWT falló: " + ctx.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnChallenge = ctx =>
+            {
+                Console.WriteLine("JWT challenge: " + ctx.Error + " - " + ctx.ErrorDescription);
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 builder.Services.AddAuthorization();
@@ -90,16 +120,14 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
 app.UseHttpsRedirection();
+
+app.UseCors("Frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("Frontend");
-
 app.MapHealthChecks("/api/health/mongodb");
-
 app.MapControllers();
 
 app.MapGet("/", () => "NominaPro API funcionando");
