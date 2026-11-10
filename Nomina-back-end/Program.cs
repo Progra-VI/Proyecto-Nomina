@@ -13,8 +13,10 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<UsuarioRepository>();
+builder.Services.AddSingleton<DepartamentoRepository>();
+builder.Services.AddScoped<DepartamentoService>();
 
+builder.Services.AddSingleton<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 
 var mongoSettings = builder.Configuration
@@ -40,7 +42,6 @@ builder.Services.AddSingleton(sp =>
     return client.GetDatabase(mongoSettings.DatabaseName);
 });
 
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<AuthService>();
 
@@ -55,9 +56,7 @@ builder.Services
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
-
         {
-
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
@@ -67,26 +66,23 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
             ClockSkew = TimeSpan.Zero
         };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine("JWT falló: " + ctx.Exception.Message);
-                return Task.CompletedTask;
-            },
-            OnChallenge = ctx =>
-            {
-                Console.WriteLine("JWT challenge: " + ctx.Error + " - " + ctx.ErrorDescription);
-                return Task.CompletedTask;
-            }
-        };
     });
 
-
-
-
 builder.Services.AddAuthorization();
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -97,24 +93,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.Use(async (ctx, next) =>
-{
-    var h = ctx.Request.Headers.Authorization.ToString();
-    Console.WriteLine($"[{ctx.Request.Path}] Auth header: {h.Length} chars, empieza con: '{(h.Length > 15 ? h[..15] : h)}'");
-    await next();
-    Console.WriteLine($"[{ctx.Request.Path}] Autenticado: {ctx.User.Identity?.IsAuthenticated} | Status: {ctx.Response.StatusCode}");
-});
-
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/debug/auth", (HttpContext ctx) => new
-{
-    headerRecibido = ctx.Request.Headers.Authorization.ToString().Length,
-    autenticado = ctx.User.Identity?.IsAuthenticated ?? false,
-    claims = ctx.User.Claims.Select(c => c.Type + " = " + c.Value)
-}).AllowAnonymous();
+app.UseCors("Frontend");
 
 app.MapHealthChecks("/api/health/mongodb");
 
