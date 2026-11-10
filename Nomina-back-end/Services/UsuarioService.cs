@@ -5,11 +5,14 @@ namespace Nomina_back_end.Services;
 
 public class UsuarioService
 {
-    private readonly UsuarioRepository _repo;
 
-    public UsuarioService(UsuarioRepository repo)
+    private readonly UsuarioRepository _repo;
+    private readonly DepartamentoRepository _departamentos;
+
+    public UsuarioService(UsuarioRepository repo, DepartamentoRepository departamentos)
     {
         _repo = repo;
+        _departamentos = departamentos;
     }
 
     public Task<List<Usuario>> ObtenerTodos() => _repo.ObtenerTodos();
@@ -62,6 +65,10 @@ public class UsuarioService
     {
         if (u.Rol is not (Roles.Empleado or Roles.Jefatura or Roles.RRHH))
             return "Rol inválido.";
+
+        var departamento = await _departamentos.ObtenerPorId(u.DepartamentoId);
+        if (departamento == null)
+            return "El departamento indicado no existe.";
 
         var porCorreo = await _repo.ObtenerPorCorreo(u.Correo);
         if (porCorreo != null && porCorreo.Id != idActual)

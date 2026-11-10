@@ -3,20 +3,38 @@
 ### Verificar conexión a Mongo
 GET {{Nomina_back_end_HostAddress}}/api/health/mongodb
 
-### Crear usuario RR.HH.
-POST {{Nomina_back_end_HostAddress}}/api/usuarios
+### Login
+# @name login
+POST {{Nomina_back_end_HostAddress}}/api/auth/login
 Content-Type: application/json
 
 {
-  "identificacion": "1-1111-1111",
-  "nombre": "Admin RRHH",
   "correo": "rrhh@techsolutions.com",
-  "rol": "RRHH",
+  "password": "Admin12345"
+}
+
+
+
+### Listar usuarios
+GET {{Nomina_back_end_HostAddress}}/api/usuarios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZhZWVhNDU0ZjcyODRjYjdjMDQ4ZDcwOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJBZG1pbiBSUkhIIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicnJoaEB0ZWNoc29sdXRpb25zLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJSSEgiLCJleHAiOjE3OTQyODg5OTQsImlzcyI6Ik5vbWluYVByby5BUEkiLCJhdWQiOiJOb21pbmFQcm8uRnJvbnRlbmQifQ.6tsPLYA-2qL7CSyorzFXdzkuoCdKUXJWfYG9amXBDAc
+Accept: application/json
+
+### Crear usuario
+POST {{Nomina_back_end_HostAddress}}/api/usuarios
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "identificacion": "2-2222-2222",
+  "nombre": "Empleado Prueba",
+  "correo": "empleado@techsolutions.com",
+  "rol": "Empleado",
   "departamentoId": "665f1c2a9b1e8a3d4c5e6f70",
-  "puesto": "Encargado de Nómina",
+  "puesto": "Desarrollador",
   "jefaturaDirectaId": null,
-  "fechaIngreso": "2024-01-15",
-  "salarioBase": 850000,
+  "fechaIngreso": "2024-03-01",
+  "salarioBase": 600000,
   "tipoJornada": "Diurna",
   "horario": {
     "horaEntrada": "08:00",
@@ -24,9 +42,30 @@ Content-Type: application/json
     "diasLaborales": [1, 2, 3, 4, 5]
   },
   "fotoUrl": null,
-  "password": "Admin12345"
+  "password": "Empleado123"
 }
 
-### Listar usuarios
-GET {{Nomina_back_end_HostAddress}}/api/usuarios
-Accept: application/json
+
+
+  ### Crear departamento
+# @name depto
+POST {{Nomina_back_end_HostAddress}}/api/departamentos
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZhZWVhNDU0ZjcyODRjYjdjMDQ4ZDcwOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJBZG1pbiBSUkhIIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicnJoaEB0ZWNoc29sdXRpb25zLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJSSEgiLCJleHAiOjE3OTQyODg5OTQsImlzcyI6Ik5vbWluYVByby5BUEkiLCJhdWQiOiJOb21pbmFQcm8uRnJvbnRlbmQifQ.6tsPLYA-2qL7CSyorzFXdzkuoCdKUXJWfYG9amXBDAc
+Content-Type: application/json
+
+{
+  "nombre": "Tecnología",
+  "descripcion": "Desarrollo y soporte de sistemas"
+}
+
+### Listar departamentos
+GET {{Nomina_back_end_HostAddress}}/api/departamentos
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZhZWVhNDU0ZjcyODRjYjdjMDQ4ZDcwOCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJBZG1pbiBSUkhIIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoicnJoaEB0ZWNoc29sdXRpb25zLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJSSEgiLCJleHAiOjE3OTQyODg5OTQsImlzcyI6Ik5vbWluYVByby5BUEkiLCJhdWQiOiJOb21pbmFQcm8uRnJvbnRlbmQifQ.6tsPLYA-2qL7CSyorzFXdzkuoCdKUXJWfYG9amXBDAc
+
+
+$r = Invoke-RestMethod -Method Post -Uri https://localhost:7296/api/auth/login `
+  -ContentType "application/json" `
+  -Body '{"correo":"rrhh@techsolutions.com","password":"Admin12345"}'
+
+Invoke-RestMethod -Uri https://localhost:7296/api/usuarios `
+  -Headers @{ Authorization = "Bearer $($r.token)" }
