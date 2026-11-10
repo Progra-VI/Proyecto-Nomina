@@ -8,6 +8,7 @@ public static class Roles
     public const string Empleado = "Empleado";
     public const string Jefatura = "Jefatura";
     public const string RRHH = "RRHH";
+    public const string JefaturaORRHH = "Jefatura,RRHH";
 }
 
 public static class EstadosUsuario

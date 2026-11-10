@@ -28,6 +28,9 @@ builder.Services.AddScoped<TipoHoraExtraService>();
 builder.Services.AddSingleton<MotivoLiquidacionRepository>();
 builder.Services.AddScoped<MotivoLiquidacionService>();
 
+builder.Services.AddSingleton<AsistenciaRepository>();
+builder.Services.AddScoped<AsistenciaService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
