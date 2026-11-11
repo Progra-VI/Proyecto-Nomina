@@ -43,6 +43,9 @@ builder.Services.AddScoped<ParametroService>();
 builder.Services.AddSingleton<VacacionRepository>();
 builder.Services.AddScoped<VacacionService>();
 
+builder.Services.AddSingleton<HoraExtraRepository>();
+builder.Services.AddScoped<HoraExtraService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
