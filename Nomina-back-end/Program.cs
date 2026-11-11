@@ -46,6 +46,13 @@ builder.Services.AddScoped<VacacionService>();
 builder.Services.AddSingleton<HoraExtraRepository>();
 builder.Services.AddScoped<HoraExtraService>();
 
+builder.Services.AddSingleton<ConfiguracionLeyRepository>();
+builder.Services.AddScoped<ConfiguracionLeyService>();
+
+builder.Services.AddSingleton<PlanillaRepository>();
+builder.Services.AddSingleton<BoletaRepository>();
+builder.Services.AddScoped<PlanillaService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
