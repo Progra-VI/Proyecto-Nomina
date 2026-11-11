@@ -31,6 +31,18 @@ builder.Services.AddScoped<MotivoLiquidacionService>();
 builder.Services.AddSingleton<AsistenciaRepository>();
 builder.Services.AddScoped<AsistenciaService>();
 
+builder.Services.AddSingleton<FeriadoRepository>();
+builder.Services.AddScoped<FeriadoService>();
+
+builder.Services.AddSingleton<PermisoRepository>();
+builder.Services.AddScoped<PermisoService>();
+
+builder.Services.AddSingleton<ParametroRepository>();
+builder.Services.AddScoped<ParametroService>();
+
+builder.Services.AddSingleton<VacacionRepository>();
+builder.Services.AddScoped<VacacionService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
