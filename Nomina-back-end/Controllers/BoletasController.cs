@@ -31,4 +31,14 @@ public class BoletasController : ControllerBase
         var (r, b) = await _service.ObtenerBoleta(id, UsuarioActualId, RolActual);
         return r.Ok ? Ok(b) : StatusCode(r.Status, new { mensaje = r.Error });
     }
+
+    [HttpGet("{id}/pdf")]
+    public async Task<IActionResult> Pdf(string id)
+    {
+        var (r, b) = await _service.ObtenerBoleta(id, UsuarioActualId, RolActual);
+        if (!r.Ok) return StatusCode(r.Status, new { mensaje = r.Error });
+
+        var pdf = BoletaPdf.Generar(new[] { b! });
+        return File(pdf, "application/pdf", $"boleta-{b!.Identificacion}-{b.Desde}.pdf");
+    }
 }
