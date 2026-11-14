@@ -282,7 +282,8 @@ public class PlanillaService
         };
     }
 
-    private static decimal CalcularRenta(decimal baseMensual, List<TramoRenta> tramos)
+    // CAMBIO: ahora es public para que la liquidación pueda reutilizarlo
+    public static decimal CalcularRenta(decimal baseMensual, List<TramoRenta> tramos)
     {
         decimal total = 0;
 

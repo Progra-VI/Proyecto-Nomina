@@ -53,6 +53,10 @@ builder.Services.AddSingleton<PlanillaRepository>();
 builder.Services.AddSingleton<BoletaRepository>();
 builder.Services.AddScoped<PlanillaService>();
 
+builder.Services.AddSingleton<LiquidacionRepository>();
+builder.Services.AddSingleton<ComprobanteStorage>();
+builder.Services.AddScoped<LiquidacionService>();
+
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
