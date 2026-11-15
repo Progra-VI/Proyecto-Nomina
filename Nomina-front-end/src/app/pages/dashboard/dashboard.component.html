@@ -1,0 +1,69 @@
+<div class="contenedor-principal">
+  <aside class="barra-lateral">
+    <div class="logo">
+      <h3>📋 Sistema de Nómina</h3>
+    </div>
+
+    <nav class="navegacion">
+      <a routerLink="/dashboard" routerLinkActive="activo">🏠 Inicio</a>
+      
+      <a routerLink="/asistencia" routerLinkActive="activo">⏰ Asistencia</a>
+      <a routerLink="/permisos" routerLinkActive="activo">📝 Permisos</a>
+      <a routerLink="/vacaciones" routerLinkActive="activo">🏖️ Vacaciones</a>
+      <a routerLink="/horas-extras" routerLinkActive="activo">⚡ Horas Extras</a>
+
+      @if(tieneRol(['RRHH'])) {
+        <div class="separador">Administración</div>
+        <a routerLink="/liquidacion" routerLinkActive="activo">📄 Liquidación</a>
+        <a routerLink="/planilla" routerLinkActive="activo">💰 Planilla</a>
+        <a routerLink="/empleados" routerLinkActive="activo">👥 Empleados</a>
+        <a routerLink="/catalogos" routerLinkActive="activo">📊 Catálogos</a>
+      }
+    </nav>
+
+    <button class="boton-salir" (click)="salir()">🚪 Cerrar Sesión</button>
+  </aside>
+
+  <main class="contenido">
+    <header class="cabecera">
+      <div class="info-usuario">
+        <span class="nombre">{{ usuario?.nombre }}</span>
+        <span class="rol">{{ usuario?.rol }}</span>
+      </div>
+    </header>
+
+    <section class="pagina">
+      <h1>Bienvenido/a, {{ usuario?.nombre }} 👋</h1>
+      <p class="subtitulo">Sistema de Gestión de Nómina y Recursos Humanos</p>
+
+      <div class="tarjetas">
+        <div class="tarjeta">
+          <h3>⏰ Asistencia</h3>
+          <p>Marcas de entrada y salida, resúmenes mensuales</p>
+        </div>
+        <div class="tarjeta">
+          <h3>📝 Permisos</h3>
+          <p>Solicitudes con y sin goce de salario</p>
+        </div>
+        <div class="tarjeta">
+          <h3>🏖️ Vacaciones</h3>
+          <p>Saldo disponible y solicitudes</p>
+        </div>
+        <div class="tarjeta">
+          <h3>⚡ Horas Extras</h3>
+          <p>Registro y aprobación de horas adicionales</p>
+        </div>
+        @if(tieneRol(['RRHH'])) {
+          <div class="tarjeta">
+            <h3>💰 Planilla</h3>
+            <p>Cálculo, aprobación y boletas de pago</p>
+          </div>
+          <div class="tarjeta">
+            <h3>👥 Empleados</h3>
+            <p>Registro y mantenimiento de personal</p>
+          </div>
+        }
+      </div>
+    </section>
+  </main>
+</div>

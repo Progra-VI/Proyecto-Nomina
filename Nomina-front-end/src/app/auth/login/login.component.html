@@ -1,0 +1,46 @@
+<div class="pagina-login">
+  <div class="caja-login">
+    <div class="cabecera-login">
+      <h1 class="titulo-sistema">Sistema de Gestión de Nómina y Recursos Humanos</h1>
+      <p class="subtitulo-sistema">Bienvenido/a — Inicia sesión para continuar</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="ingresar()" class="formulario">
+      <div class="grupo-campo">
+        <label for="correo">Correo Electrónico</label>
+        <input 
+          type="email" 
+          id="correo"
+          formControlName="correo" 
+          placeholder="correo@tuempresa.cr"
+          class="entrada"
+        />
+      </div>
+
+      <div class="grupo-campo">
+        <label for="contrasena">Contraseña</label>
+        <input 
+          type="password" 
+          id="contrasena"
+          formControlName="contrasena" 
+          placeholder="Escribe tu contraseña"
+          class="entrada"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        class="boton-ingresar"
+        [disabled]="loginForm.invalid"
+      >
+        Ingresar al Sistema
+      </button>
+
+      @if(error) {
+        <p class="mensaje-error">{{ error }}</p>
+      }
+    </form>
+
+    <p class="pie-login">© 2026 — Gestión de Personal y Nómina · Todos los derechos reservados</p>
+  </div>
+</div>

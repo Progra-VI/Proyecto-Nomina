@@ -1,0 +1,145 @@
+.contenedor-principal {
+  display: flex;
+  min-height: 100vh;
+  background: #f7fafc;
+}
+
+.barra-lateral {
+  width: 260px;
+  background: #1a202c;
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.logo {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2d3748;
+}
+
+.logo h3 {
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+.navegacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.navegacion a {
+  color: #cbd5e0;
+  text-decoration: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.navegacion a:hover {
+  background: #2d3748;
+  color: white;
+}
+
+.navegacion a.activo {
+  background: #2b6cb0;
+  color: white;
+  font-weight: 600;
+}
+
+.separador {
+  margin: 1rem 0 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3748;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.boton-salir {
+  margin-top: auto;
+  padding: 0.8rem;
+  background: #c53030;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.boton-salir:hover {
+  background: #9b2c2c;
+}
+
+.contenido {
+  flex: 1;
+  padding: 2rem;
+}
+
+.cabecera {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.info-usuario {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nombre {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.rol {
+  padding: 0.3rem 0.8rem;
+  background: #edf2f7;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #2b6cb0;
+  font-weight: 600;
+}
+
+.pagina h1 {
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.subtitulo {
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.tarjeta {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-left: 4px solid #2b6cb0;
+  transition: transform 0.2s;
+}
+
+.tarjeta:hover {
+  transform: translateY(-3px);
+}
+
+.tarjeta h3 {
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.tarjeta p {
+  color: #718096;
+  font-size: 0.9rem;
+}
