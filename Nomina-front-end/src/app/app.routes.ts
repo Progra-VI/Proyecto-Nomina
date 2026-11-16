@@ -4,7 +4,10 @@ import { RolGuard } from './core/guards/rol.guard';
 import { LoginComponent } from './auth/login/login.component';
 
 export const routes: Routes = [
+ 
   { path: 'login', component: LoginComponent },
+
+ 
   {
     path: '',
     canActivate: [AuthGuard],
@@ -18,8 +21,10 @@ export const routes: Routes = [
       { path: 'liquidacion', loadComponent: () => import('./pages/liquidacion/liquidacion.component').then(m => m.LiquidacionComponent), canActivate: [RolGuard], data: { roles: ['RRHH'] } },
       { path: 'planilla', loadComponent: () => import('./pages/planilla/planilla.component').then(m => m.PlanillaComponent), canActivate: [RolGuard], data: { roles: ['RRHH'] } },
       { path: 'empleados', loadComponent: () => import('./pages/empleados/empleados.component').then(m => m.EmpleadosComponent), canActivate: [RolGuard], data: { roles: ['RRHH'] } },
-      { path: 'catalogos', loadComponent: () => import('./pages/catalogos/catalogos.component').then(m => m.CatalogosComponent), canActivate: [RolGuard], data: { roles: ['RRHH'] } },
-      { path: '**', redirectTo: 'dashboard' }
+      { path: 'catalogos', loadComponent: () => import('./pages/catalogos/catalogos.component').then(m => m.CatalogosComponent), canActivate: [RolGuard], data: { roles: ['RRHH'] } }
     ]
-  }
+  },
+
+  
+  { path: '**', redirectTo: 'login' }
 ];
