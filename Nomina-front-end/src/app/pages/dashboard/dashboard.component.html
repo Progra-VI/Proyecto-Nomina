@@ -67,3 +67,16 @@
     </section>
   </main>
 </div>
+
+@if (mostrarModal) {
+  <div class="modal-backdrop">
+    <div class="modal-caja">
+      <h2>¡Bienvenido/a!</h2>
+      <p class="nombre-usuario">{{ usuario?.nombre }}</p>
+      <p class="mensaje-bienvenida">Nos alegra tenerte de vuelta en el sistema.</p>
+      <button class="boton-aceptar" (click)="cerrarModal()">
+        Continuar al Sistema
+      </button>
+    </div>
+  </div>
+}
