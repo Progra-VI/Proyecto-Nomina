@@ -1,22 +1,35 @@
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { UsuarioLogin } from '../models/usuario.model';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  guardarSesion(token: string, usuario: any) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('usuario', JSON.stringify(usuario));
+  private usuarioMock: UsuarioLogin = {
+    id: '101',
+    nombre: 'Natalia Arce',
+    email: 'natalia.arce@nominapro.com',
+    rol: 'RRHH', 
+    departamento: 'TI',
+    token: 'jwt_token_seguro_123456789'
+  };
+
+  login(email: string, pass: string): Observable<UsuarioLogin> {
+    localStorage.setItem('usuario', JSON.stringify(this.usuarioMock));
+    return of(this.usuarioMock);
   }
 
-  cerrarSesion() {
-    localStorage.removeItem('token');
+  obtenerUsuarioActual(): UsuarioLogin | null {
+    const data = localStorage.getItem('usuario');
+    return data ? JSON.parse(data) : null;
+  }
+
+  obtenerUsuario(): UsuarioLogin | null {
+    return this.obtenerUsuarioActual();
+  }
+
+  cerrarSesion(): void {
     localStorage.removeItem('usuario');
-  }
-
-  estaAutenticado(): boolean {
-    return !!localStorage.getItem('token');
-  }
-
-  obtenerUsuario() {
-    return JSON.parse(localStorage.getItem('usuario') || 'null');
   }
 }

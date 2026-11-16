@@ -1,52 +1,45 @@
 import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  loginForm;
+  email = '';
+  password = '';
   error = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      correo: ['', [Validators.required, Validators.email]],
-      contrasena: ['', Validators.required]
+  constructor(private authService: AuthService, private router: Router) {}
+
+  onLogin(): void {
+    this.authService.login(this.email, this.password).subscribe({
+      next: (user) => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.error = 'Credenciales inválidas. Verifique sus datos.';
+      }
     });
   }
 
-  ingresar() {
-    if (this.loginForm.invalid) return;
-
-    const { correo, contrasena } = this.loginForm.value;
-    if (!correo || !contrasena) return;
-
-    let rolAsignado: 'Empleado' | 'Jefatura' | 'RRHH' = 'Empleado';
-    
-    if (correo?.includes('rrhh') || correo?.includes('rh')) {
-      rolAsignado = 'RRHH';
-    } else if (correo?.includes('jefatura') || correo?.includes('jefe')) {
-      rolAsignado = 'Jefatura';
-    }
-
-    this.authService.guardarSesion('token-simulado', {
-      id: '1',
-      nombre: correo?.split('@')[0] || 'Usuario',
-      correo,
-      rol: rolAsignado,
-      departamento: rolAsignado === 'RRHH' ? 'Recursos Humanos' : 'Operaciones'
-    });
-
+  
+  iniciarComo(rol: 'Empleado' | 'Jefatura' | 'RRHH'): void {
+    const mockUser = {
+      id: '101',
+      nombre: `Usuario ${rol}`,
+      email: `${rol.toLowerCase()}@nominapro.com`,
+      rol: rol,
+      departamento: 'Operaciones',
+      token: 'jwt_token_mock'
+    };
+    localStorage.setItem('usuario', JSON.stringify(mockUser));
     this.router.navigate(['/dashboard']);
   }
 }

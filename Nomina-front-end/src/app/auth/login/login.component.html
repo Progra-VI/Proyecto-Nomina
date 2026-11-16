@@ -1,68 +1,33 @@
-<div class="pagina-login">
-  <div class="contenedor-principal">
-    
-    <!-- Panel Izquierdo: Institucional / Marca -->
-    <div class="panel-izquierdo">
-      <div class="contenido-marca">
-        <div class="logo-contenedor">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </div>
-        <span class="badge-corporativo">Portal Corporativo</span>
-        <h1>NóminaPro 2026</h1>
-        <p>Plataforma centralizada para la administración de personal, gestión de planillas y control de recursos humanos.</p>
+<div class="login-container">
+  <div class="login-card">
+    <h2>NóminaPro 2026</h2>
+    <p class="subtitle">Inicie sesión para acceder al sistema corporativo</p>
+
+    @if (error) {
+      <div class="alert-error">{{ error }}</div>
+    }
+
+    <form (submit)="$event.preventDefault(); onLogin()">
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="correo@nominapro.com" required />
       </div>
-      <div class="footer-marca">
-        <span>Ministerio de Seguridad Pública · Costa Rica</span>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required />
       </div>
-    </div>
 
-    <!-- Panel Derecho: Formulario de Acceso -->
-    <div class="panel-derecho">
-      <div class="caja-formulario">
-        <div class="cabecera-form">
-          <h2>Iniciar Sesión</h2>
-          <p>Ingrese sus credenciales institucionales</p>
-        </div>
+      <button type="submit" class="btn-primary">Iniciar Sesión</button>
+    </form>
 
-        <form [formGroup]="loginForm" (ngSubmit)="ingresar()" class="formulario">
-          <div class="grupo-campo">
-            <label for="correo">Correo Electrónico</label>
-            <input 
-              type="email" 
-              id="correo"
-              formControlName="correo" 
-              placeholder="usuario@nominapro.cr"
-              class="entrada"
-            />
-          </div>
-
-          <div class="grupo-campo">
-            <label for="contrasena">Contraseña</label>
-            <input 
-              type="password" 
-              id="contrasena"
-              formControlName="contrasena" 
-              placeholder="••••••••"
-              class="entrada"
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            class="boton-ingresar"
-            [disabled]="loginForm.invalid"
-          >
-            Acceder al Sistema
-          </button>
-
-          @if(error) {
-            <p class="mensaje-error">{{ error }}</p>
-          }
-        </form>
-
-        <p class="pie-login">© 2026 NóminaPro · Todos los derechos reservados</p>
+    <div class="access-rapido">
+      <p>Acceso rápido de prueba por Rol:</p>
+      <div class="btn-roles">
+        <button (click)="iniciarComo('Empleado')" class="btn-rol empleado">👤 Empleado</button>
+        <button (click)="iniciarComo('Jefatura')" class="btn-rol jefatura">👔 Jefatura</button>
+        <button (click)="iniciarComo('RRHH')" class="btn-rol rrhh">🏢 RR.HH.</button>
       </div>
     </div>
-
   </div>
 </div>
