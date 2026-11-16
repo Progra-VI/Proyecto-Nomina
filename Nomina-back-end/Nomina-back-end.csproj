@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Nomina_back_end</RootNamespace>
+    <UserSecretsId>df95b355-fdda-4b38-8141-b9ae7f2d6f4a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

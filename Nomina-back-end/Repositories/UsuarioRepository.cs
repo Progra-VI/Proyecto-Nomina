@@ -82,4 +82,14 @@ public class UsuarioRepository
         var r = await _usuarios.UpdateOneAsync(x => x.Id == id, update);
         return r.MatchedCount > 0;
     }
+
+    public async Task<bool> CambiarPassword(string id, string passwordHash)
+    {
+        var update = Builders<Usuario>.Update
+            .Set(x => x.PasswordHash, passwordHash)
+            .Set(x => x.FechaActualizacion, DateTime.UtcNow);
+
+        var r = await _usuarios.UpdateOneAsync(x => x.Id == id, update);
+        return r.MatchedCount > 0;
+    }
 }
