@@ -1,58 +1,19 @@
-using MongoDB.Driver;
-using Nomina_back_end;
-using Nomina_back_end.Data;
-using Nomina_back_end.Services;
-using Nomina_back_end.Repositories;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
+using Nomina_back_end;
+using Nomina_back_end.Data;
+using Nomina_back_end.Repositories;
+using Nomina_back_end.Services;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+// ---------- Licencia de QuestPDF (PDF de boletas y liquidaciones) ----------
+QuestPDF.Settings.License = LicenseType.Community;
 
-builder.Services.AddControllers();
-
-builder.Services.AddSingleton<DepartamentoRepository>();
-builder.Services.AddScoped<DepartamentoService>();
-
-builder.Services.AddSingleton<UsuarioRepository>();
-builder.Services.AddScoped<UsuarioService>();
-
-builder.Services.AddSingleton<TipoPermisoRepository>();
-builder.Services.AddScoped<TipoPermisoService>();
-
-builder.Services.AddSingleton<TipoHoraExtraRepository>();
-builder.Services.AddScoped<TipoHoraExtraService>();
-
-builder.Services.AddSingleton<MotivoLiquidacionRepository>();
-builder.Services.AddScoped<MotivoLiquidacionService>();
-
-builder.Services.AddSingleton<AsistenciaRepository>();
-builder.Services.AddScoped<AsistenciaService>();
-
-builder.Services.AddSingleton<FeriadoRepository>();
-builder.Services.AddScoped<FeriadoService>();
-
-builder.Services.AddSingleton<PermisoRepository>();
-builder.Services.AddScoped<PermisoService>();
-
-builder.Services.AddSingleton<ParametroRepository>();
-builder.Services.AddScoped<ParametroService>();
-
-builder.Services.AddSingleton<VacacionRepository>();
-builder.Services.AddScoped<VacacionService>();
-
-builder.Services.AddSingleton<HoraExtraRepository>();
-builder.Services.AddScoped<HoraExtraService>();
-
-builder.Services.AddSingleton<ConfiguracionLeyRepository>();
-builder.Services.AddScoped<ConfiguracionLeyService>();
-
-builder.Services.AddSingleton<PlanillaRepository>();
-builder.Services.AddSingleton<BoletaRepository>();
-builder.Services.AddScoped<PlanillaService>();
-
+// ---------- Configuración ----------
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
@@ -64,27 +25,31 @@ if (mongoSettings == null ||
     throw new Exception("La configuración de MongoDB no está completa.");
 }
 
-builder.Services.AddSingleton<IMongoClient>(_ =>
-    new MongoClient(mongoSettings.ConnectionString));
+var jwt = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>();
 
-builder.Services.AddHealthChecks()
-    .AddCheck<MongoDbHealthCheck>("mongodb");
-
-builder.Services.AddSingleton(sp =>
-{
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(mongoSettings.DatabaseName);
-});
-
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-builder.Services.AddScoped<AuthService>();
-
-var jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 if (jwt == null || string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
 {
     throw new Exception("La configuración de JWT no está completa (la clave debe tener 32+ caracteres).");
 }
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// ---------- MongoDB ----------
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoSettings.ConnectionString));
+
+builder.Services.AddSingleton(sp =>
+    sp.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
+
+builder.Services.AddHealthChecks()
+    .AddCheck<MongoDbHealthCheck>("mongodb");
+
+// ---------- Seguridad: JWT y CORS ----------
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -100,34 +65,9 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
             ClockSkew = TimeSpan.Zero
         };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = ctx =>
-            {
-                var h = ctx.Request.Headers.Authorization.ToString();
-                Console.WriteLine($"JWT recibido: {ctx.Request.Method} {ctx.Request.Path} | header: {h.Length} chars | empieza con: '{(h.Length > 15 ? h[..15] : h)}'");
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine("JWT falló: " + ctx.Exception.Message);
-                return Task.CompletedTask;
-            },
-            OnChallenge = ctx =>
-            {
-                Console.WriteLine("JWT challenge: " + ctx.Error + " - " + ctx.ErrorDescription);
-                return Task.CompletedTask;
-            }
-        };
-
     });
 
 builder.Services.AddAuthorization();
-
-var allowedOrigins = builder.Configuration
-    .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? Array.Empty<string>();
 
 builder.Services.AddCors(options =>
 {
@@ -139,22 +79,76 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ---------- Autenticación y usuarios ----------
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<UsuarioRepository>();
+builder.Services.AddScoped<UsuarioService>();
+
+// ---------- Catálogos ----------
+builder.Services.AddSingleton<DepartamentoRepository>();
+builder.Services.AddScoped<DepartamentoService>();
+
+builder.Services.AddSingleton<TipoPermisoRepository>();
+builder.Services.AddScoped<TipoPermisoService>();
+
+builder.Services.AddSingleton<TipoHoraExtraRepository>();
+builder.Services.AddScoped<TipoHoraExtraService>();
+
+builder.Services.AddSingleton<MotivoLiquidacionRepository>();
+builder.Services.AddScoped<MotivoLiquidacionService>();
+
+builder.Services.AddSingleton<FeriadoRepository>();
+builder.Services.AddScoped<FeriadoService>();
+
+// ---------- Parámetros y configuración de ley ----------
+builder.Services.AddSingleton<ParametroRepository>();
+builder.Services.AddScoped<ParametroService>();
+
+builder.Services.AddSingleton<ConfiguracionLeyRepository>();
+builder.Services.AddScoped<ConfiguracionLeyService>();
+
+// ---------- Módulos ----------
+builder.Services.AddSingleton<AsistenciaRepository>();
+builder.Services.AddScoped<AsistenciaService>();
+
+builder.Services.AddSingleton<PermisoRepository>();
+builder.Services.AddScoped<PermisoService>();
+
+builder.Services.AddSingleton<VacacionRepository>();
+builder.Services.AddScoped<VacacionService>();
+
+builder.Services.AddSingleton<HoraExtraRepository>();
+builder.Services.AddScoped<HoraExtraService>();
+
+builder.Services.AddSingleton<PlanillaRepository>();
+builder.Services.AddSingleton<BoletaRepository>();
+builder.Services.AddScoped<PlanillaService>();
+
+builder.Services.AddSingleton<LiquidacionRepository>();
+builder.Services.AddSingleton<ComprobanteStorage>();
+builder.Services.AddScoped<LiquidacionService>();
+
+// ---------- Framework ----------
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
 
+await AdminSeeder.Sembrar(app.Services, app.Configuration, app.Logger);
+
+// ---------- Pipeline ----------
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
 app.UseHttpsRedirection();
-
 app.UseCors("Frontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/api/health/mongodb");
 app.MapControllers();
-
 app.MapGet("/", () => "NominaPro API funcionando");
 
 app.Run();

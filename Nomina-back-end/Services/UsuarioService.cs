@@ -89,4 +89,36 @@ public class UsuarioService
 
         return null;
     }
+
+    public async Task<Resultado> CambiarPassword(string usuarioId, string actual, string nueva)
+    {
+        var u = await _repo.ObtenerPorId(usuarioId);
+        if (u == null || u.Estado != EstadosUsuario.Activo)
+            return Resultado.Fallo("Usuario no válido.", 403);
+
+        // Es 400 y no 401 a propósito: un 401 haría que el frontend cierre la sesión
+        if (!BCrypt.Net.BCrypt.Verify(actual, u.PasswordHash))
+            return Resultado.Fallo("La contraseña actual es incorrecta.");
+
+        if (actual == nueva)
+            return Resultado.Fallo("La nueva contraseña debe ser distinta a la actual.");
+
+        await _repo.CambiarPassword(usuarioId, BCrypt.Net.BCrypt.HashPassword(nueva));
+        return Resultado.Exito();
+    }
+
+    public async Task<Resultado> RestablecerPassword(string id, string nueva)
+    {
+        if (await _repo.ObtenerPorId(id) == null)
+            return Resultado.Fallo("Usuario no encontrado.", 404);
+
+        await _repo.CambiarPassword(id, BCrypt.Net.BCrypt.HashPassword(nueva));
+        return Resultado.Exito();
+    }
+
+    public async Task<List<Usuario>> ObtenerEquipo(string jefeId) =>
+        (await _repo.ObtenerPorJefatura(jefeId))
+            .Where(u => u.Estado == EstadosUsuario.Activo)
+            .OrderBy(u => u.Nombre)
+            .ToList();
 }

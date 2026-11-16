@@ -65,7 +65,18 @@ public class VacacionService
         return r.Ok ? (r, calc!.Acumulado - calc.Aprobado) : (r, 0);
     }
 
-    private async Task<(Resultado r, Calculo? calc)> CalcularSaldo(Usuario u, string? excluirId)
+    // CAMBIO: saldo a una fecha dada (la liquidación lo usa con la fecha de salida)
+    public async Task<(Resultado r, decimal saldo)> SaldoAlDia(string usuarioId, DateTime dia)
+    {
+        var u = await _usuarios.ObtenerPorId(usuarioId);
+        if (u == null) return (Resultado.Fallo("Empleado no encontrado.", 404), 0);
+
+        var (r, calc) = await CalcularSaldo(u, null, dia);
+        return r.Ok ? (r, Math.Max(0, calc!.Acumulado - calc.Aprobado)) : (r, 0);
+    }
+
+    // CAMBIO: parámetro opcional alDia (por defecto, hoy en hora de Costa Rica)
+    private async Task<(Resultado r, Calculo? calc)> CalcularSaldo(Usuario u, string? excluirId, DateTime? alDia = null)
     {
         var semanasPorPeriodo = await _parametros.ObtenerValor(ClaveSemanas);
         var diasPorPeriodo = await _parametros.ObtenerValor(ClaveDias);
@@ -74,7 +85,7 @@ public class VacacionService
             return (Resultado.Fallo(
                 $"RR.HH. debe configurar los parámetros '{ClaveSemanas}' y '{ClaveDias}'.", 400), null);
 
-        var hoy = HoraCR.ALocal(DateTime.UtcNow).Date;
+        var hoy = alDia?.Date ?? HoraCR.ALocal(DateTime.UtcNow).Date;
         var semanas = Math.Max(0, Math.Floor((hoy - u.FechaIngreso.Date).TotalDays / 7));
         var acumulado = Math.Round((decimal)semanas * diasPorPeriodo.Value / semanasPorPeriodo.Value, 2);
 

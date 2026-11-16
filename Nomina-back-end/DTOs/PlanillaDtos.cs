@@ -23,10 +23,34 @@ public class TramoRentaDto
     public decimal Porcentaje { get; set; }
 }
 
+public class TramoDiasDto
+{
+    [Range(0, 1200)]
+    public int MesesDesde { get; set; }
+
+    public int? MesesHasta { get; set; }
+
+    [Range(0, 365)]
+    public decimal Dias { get; set; }
+}
+
+public class DiasCesantiaAnioDto
+{
+    [Range(1, 50)]
+    public int Anios { get; set; }
+
+    [Range(0, 365)]
+    public decimal DiasPorAnio { get; set; }
+}
+
+
 public class ConfiguracionLeyDto
 {
     public List<CargaSocialDto> CargasSociales { get; set; } = new();
     public List<TramoRentaDto> TramosRenta { get; set; } = new();
+    public List<TramoDiasDto> PreavisoTramos { get; set; } = new();          // NUEVO
+    public List<TramoDiasDto> CesantiaMenorUnAnio { get; set; } = new();     // NUEVO
+    public List<DiasCesantiaAnioDto> CesantiaPorAnio { get; set; } = new();  // NUEVO
 }
 
 // ----- Planilla -----
