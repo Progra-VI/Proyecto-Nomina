@@ -1,0 +1,241 @@
+/* ================= CONTENEDOR PRINCIPAL ================= */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  min-height: 100vh;
+}
+
+/* ================= CABECERA DE LA VISTA ================= */
+.gestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.2rem;
+}
+
+.text-muted {
+  color: #6c757d !important;
+  font-size: 0.95rem;
+}
+
+hr {
+  border-top: 1px solid #dee2e6;
+  opacity: 1;
+  margin-bottom: 1.5rem;
+}
+
+/* ================= PESTAÑAS (TABS) ESTILO MODERNO ================= */
+.nav-pills {
+  display: flex;
+  gap: 10px;
+  border-bottom: none;
+  margin-bottom: 1.5rem;
+}
+
+.nav-pills .nav-link {
+  color: #495057;
+  font-weight: 600;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 10px 24px;
+  transition: all 0.25s ease-in-out;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.nav-pills .nav-link:hover {
+  background-color: #f8fafc;
+  color: #0d6efd;
+  border-color: #cbd5e1;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #0d6efd;
+  color: #ffffff;
+  border-color: #0d6efd;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.25);
+}
+
+/* ================= TARJETAS Y CONTENEDORES DE TABLA ================= */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ================= TABLAS PROFESIONALES ================= */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.table-dark th {
+  background-color: #1e293b !important;
+  border-color: #1e293b;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+}
+
+.table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.92rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Badges de Estado */
+.badge {
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.bg-success {
+  background-color: #10b981 !important;
+}
+
+.bg-danger {
+  background-color: #ef4444 !important;
+}
+
+/* Botones de Acción en Tablas */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* ================= MODAL FLOTANTE CORPORATIVO (CORREGIDO) ================= */
+.modal {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-dialog {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  z-index: 1060;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.25rem 1.5rem;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.modal-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.15rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 1rem 1.5rem;
+}
+
+/* ================= CAMPOS DE FORMULARIO E INPUTS ================= */
+.form-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.92rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background-color: #ffffff;
+}
+
+/* Secciones internas del formulario (ej. Horarios) */
+.border.rounded {
+  border-color: #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  border-radius: 10px !important;
+}
+
+.border.rounded h6 {
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+/* ================= ANIMACIONES ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
