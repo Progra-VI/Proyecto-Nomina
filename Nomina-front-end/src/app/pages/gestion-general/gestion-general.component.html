@@ -1,0 +1,280 @@
+<div class="container mt-4">
+  <h2>Panel General de Gestión</h2>
+  <p class="text-muted">Administra usuarios, empleados y catálogos desde una sola vista.</p>
+  <hr>
+
+  <!-- Menú de Pestañas -->
+  <ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="seccionActiva === 'usuarios'" (click)="cambiarSeccion('usuarios')">Usuarios</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="seccionActiva === 'catalogos'" (click)="cambiarSeccion('catalogos')">Catálogos</button>
+    </li>
+  </ul>
+
+  <!-- ================= VISTA 1: USUARIOS ================= -->
+  <div *ngIf="seccionActiva === 'usuarios'" class="card p-4 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>Mantenimiento de Usuarios</h3>
+      <button class="btn btn-primary btn-sm" (click)="abrirModal()">+ Nuevo Usuario</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Identificación</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td>{{ u.identificacion || u.Identificacion }}</td>
+            <td>{{ u.nombre || u.Nombre }}</td>
+            <td>{{ u.correo || u.Correo }}</td>
+            <td>{{ u.rol || u.Rol }}</td>
+            <td>
+              <span class="badge" [ngClass]="(u.estado || u.Estado) === 'Activo' ? 'bg-success' : 'bg-danger'">
+                {{ u.estado || u.Estado }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-danger" *ngIf="(u.estado || u.Estado) === 'Activo'" (click)="inactivarUsuario(u.id || u.Id)">Inactivar</button>
+            </td>
+          </tr>
+          <tr *ngIf="usuarios.length === 0">
+            <td colspan="6" class="text-center text-muted py-4">No hay registros de usuarios disponibles.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= VISTA 3: CATÁLOGOS ================= -->
+  <div *ngIf="seccionActiva === 'catalogos'" class="card p-4 shadow-sm mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h3>Gestión de Catálogos</h3>
+
+      <div class="d-flex align-items-center gap-2">
+        <select
+          class="form-select form-select-sm w-auto"
+          [value]="catalogoSeleccionadoTipo"
+          (change)="catalogoSeleccionadoTipo = $any($event.target).value">
+          <option value="todos">Todos los tipos</option>
+          <option *ngFor="let t of tiposCatalogoFiltro" [value]="t.key">{{ t.label }}</option>
+        </select>
+
+        <button class="btn btn-primary btn-sm" (click)="abrirModal()">+ Nuevo Catálogo</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>Tipo</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let cat of (catalogoSeleccionadoTipo === 'todos'
+              ? catalogos
+              : catalogos.filter(item => item.tipoKey === catalogoSeleccionadoTipo))">
+            <td>{{ cat.tipoCatalogo }}</td>
+            <td>{{ cat.nombre }}</td>
+            <td>{{ cat.descripcion }}</td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="editarCatalogo(cat)">
+                Editar
+              </button>
+            </td>
+          </tr>
+          <tr
+            *ngIf="(catalogoSeleccionadoTipo === 'todos'
+              ? catalogos
+              : catalogos.filter(item => item.tipoKey === catalogoSeleccionadoTipo)).length === 0">
+            <td colspan="4" class="text-center text-muted py-4">No hay catálogos registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: NUEVO USUARIO ================= -->
+<div class="modal" tabindex="-1" *ngIf="mostrarModalUsuario" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Registro de Usuario</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Identificación</label><input type="text" class="form-control" formControlName="identificacion"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Nombre</label><input type="text" class="form-control" formControlName="nombre"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Correo</label><input type="email" class="form-control" formControlName="correo"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Rol</label><select class="form-select" formControlName="rol"><option value="Empleado">Empleado</option><option value="Jefatura">Jefatura</option><option value="RRHH">RRHH</option></select></div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Departamento</label>
+              <select class="form-select" formControlName="departamentoId">
+                <option value="" disabled>Seleccione un departamento</option>
+                <option *ngFor="let d of departamentos" [value]="d.id">{{ d.nombre }}</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3"><label class="form-label">Puesto</label><input type="text" class="form-control" formControlName="puesto"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Jefatura Directa ID</label><input type="text" class="form-control" formControlName="jefaturaDirectaId"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Fecha Ingreso</label><input type="date" class="form-control" formControlName="fechaIngreso"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Salario Base</label><input type="number" class="form-control" formControlName="salarioBase"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Tipo Jornada</label><input type="text" class="form-control" formControlName="tipoJornada"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Foto URL</label><input type="text" class="form-control" formControlName="fotoUrl"></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Contraseña</label><input type="password" class="form-control" formControlName="password"></div>
+          </div>
+          <div formGroupName="horario" class="border p-3 mb-3 rounded">
+            <h6>Horario Laboral</h6>
+            <div class="row">
+              <div class="col-md-6 mb-3"><label class="form-label">Hora Entrada</label><input type="text" class="form-control" formControlName="horaEntrada"></div>
+              <div class="col-md-6 mb-3"><label class="form-label">Hora Salida</label><input type="text" class="form-control" formControlName="horaSalida"></div>
+            </div>
+          </div>
+          <div class="modal-footer px-0 pb-0">
+            <button type="submit" class="btn btn-success">Guardar Usuario</button>
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: NUEVO EMPLEADO ================= -->
+<div class="modal" tabindex="-1" *ngIf="mostrarModalEmpleado" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo Registro de Empleado</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="empleadoForm" (ngSubmit)="guardarEmpleado()">
+          <div class="mb-3"><label class="form-label">Usuario ID</label><input type="text" class="form-control" formControlName="usuarioId"></div>
+          <div class="mb-3"><label class="form-label">N° de Expediente</label><input type="text" class="form-control" formControlName="numeroExpediente"></div>
+          <div class="mb-3"><label class="form-label">Tipo de Contrato</label><select class="form-select" formControlName="tipoContrato"><option value="Indefinido">Indefinido</option><option value="Plazo Fijo">Plazo Fijo</option><option value="Servicios">Servicios</option></select></div>
+          <div class="mb-3"><label class="form-label">Cuenta Bancaria</label><input type="text" class="form-control" formControlName="cuentaBancaria"></div>
+          <div class="modal-footer px-0 pb-0">
+            <button type="submit" class="btn btn-success">Guardar Empleado</button>
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: CATÁLOGO ================= -->
+<div class="modal" tabindex="-1" *ngIf="mostrarModalCatalogo" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editandoCatalogoId ? 'Editar Registro de Catálogo' : 'Nuevo Registro de Catálogo' }}</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="catalogoForm" (ngSubmit)="guardarCatalogo()">
+          <div class="mb-3">
+            <label class="form-label">Tipo de Catálogo</label>
+            <select class="form-select" formControlName="tipoCatalogo">
+              <option value="departamentos">Departamento</option>
+              <option value="feriados">Feriado</option>
+              <option value="motivos-liquidacion">Motivo de liquidación</option>
+              <option value="tipos-hora-extra">Tipo de hora extra</option>
+              <option value="tipos-permiso">Tipo de permiso</option>
+              <option value="parametros">Parámetro</option>
+            </select>
+          </div>
+
+          <!-- Campos para PARÁMETROS -->
+          <ng-container *ngIf="catalogoForm.get('tipoCatalogo')?.value === 'parametros'; else camposCatalogoEstandar">
+            <div class="mb-3">
+              <label class="form-label">Clave (minúsculas, números, punto o guion bajo)</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="clave"
+                [readonly]="!!editandoCatalogoId"
+                placeholder="ej. porcentaje_aguinaldo">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Valor</label>
+              <input type="text" class="form-control" formControlName="valor" placeholder="Valor del parámetro">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+            </div>
+          </ng-container>
+
+          <!-- Campos para DEPARTAMENTOS, FERIADOS, MOTIVOS, HORAS EXTRA Y PERMISOS -->
+          <ng-template #camposCatalogoEstandar>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" formControlName="nombre">
+            </div>
+
+            <div class="mb-3" *ngIf="catalogoForm.get('tipoCatalogo')?.value === 'feriados'">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-control" formControlName="fecha">
+            </div>
+
+            <div class="mb-3" *ngIf="catalogoForm.get('tipoCatalogo')?.value === 'tipos-hora-extra'">
+              <label class="form-label">Recargo</label>
+              <input type="number" step="0.01" class="form-control" formControlName="recargo">
+            </div>
+
+            <div class="d-flex gap-4 mb-3" *ngIf="catalogoForm.get('tipoCatalogo')?.value === 'motivos-liquidacion'">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="pagaPreaviso" formControlName="pagaPreaviso">
+                <label class="form-check-label" for="pagaPreaviso">Paga preaviso</label>
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="pagaCesantia" formControlName="pagaCesantia">
+                <label class="form-check-label" for="pagaCesantia">Paga cesantía</label>
+              </div>
+            </div>
+
+            <div class="mb-3" *ngIf="catalogoForm.get('tipoCatalogo')?.value !== 'feriados'">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" formControlName="descripcion" rows="3"></textarea>
+            </div>
+          </ng-template>
+
+          <div class="modal-footer px-0 pb-0">
+            <button type="submit" class="btn btn-success">Guardar Catálogo</button>
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
