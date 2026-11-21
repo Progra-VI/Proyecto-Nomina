@@ -1,0 +1,232 @@
+<div class="modulo-asistencia">
+  
+  <div class="cabecera-superior">
+    <div>
+      <h2>⏰ Control de Asistencia y Jornadas</h2>
+      <p class="subtitulo">Registro biométrico web, detección de tardías e integración directa con planilla.</p>
+    </div>
+
+    <div class="tarjeta-reloj">
+      <div class="info-tiempo">
+        <span class="fecha-hoy">{{ fechaActual }}</span>
+        <span class="hora-vivo">{{ horaActual }}</span>
+        <span class="horario-turno">Turno asignado: 08:00 - 17:00</span>
+      </div>
+      <div class="acciones-marcaje">
+        <button class="btn-entrada" (click)="marcar('entrada')">▶ Marcar Entrada</button>
+        <button class="btn-salida" (click)="marcar('salida')">⏹ Marcar Salida</button>
+      </div>
+    </div>
+  </div>
+
+  @if (mensajeAlerta) {
+    <div class="alerta-exito">{{ mensajeAlerta }}</div>
+  }
+
+ 
+  <div class="tabs-asistencia">
+    <button 
+      [class.activo]="vistaActiva === 'marcas'" 
+      (click)="vistaActiva = 'marcas'">
+      📋 Registro Diario de Marcas
+    </button>
+    <button 
+      [class.activo]="vistaActiva === 'resumen'" 
+      (click)="vistaActiva = 'resumen'">
+      📊 Resumen Mensual y Cálculo de Planilla
+    </button>
+  </div>
+
+  <!-- VISTA 1: MARCAS DIARIAS Y FILTROS -->
+  @if (vistaActiva === 'marcas') {
+    <div class="barra-filtros">
+      <div class="campo-filtro">
+        <label>Colaborador</label>
+        <input type="text" [(ngModel)]="filtroEmpleado" (input)="cargarDatos()" placeholder="Buscar por nombre..." />
+      </div>
+
+      <div class="campo-filtro">
+        <label>Departamento</label>
+        <select [(ngModel)]="filtroDepartamento" (change)="cargarDatos()">
+          <option value="Todos">Todos los departamentos</option>
+          <option value="Operaciones">Operaciones</option>
+          <option value="Recursos Humanos">Recursos Humanos</option>
+          <option value="Finanzas">Finanzas</option>
+        </select>
+      </div>
+
+      <div class="campo-filtro">
+        <label>Desde</label>
+        <input type="date" [(ngModel)]="filtroFechaInicio" (change)="cargarDatos()" />
+      </div>
+
+      <div class="campo-filtro">
+        <label>Hasta</label>
+        <input type="date" [(ngModel)]="filtroFechaFin" (change)="cargarDatos()" />
+      </div>
+
+      <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Colaborador</th>
+            <th>Departamento</th>
+            <th>Horario</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Estado</th>
+            <th>Auditoría / Justificación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (reg of registros; track reg.id) {
+            <tr>
+              <td><strong>{{ reg.fecha }}</strong></td>
+              <td>{{ reg.nombreEmpleado }}</td>
+              <td>{{ reg.departamento }}</td>
+              <td class="texto-gris">{{ reg.horarioAsignadoEntrada }} - {{ reg.horarioAsignadoSalida }}</td>
+              <td>{{ reg.horaEntrada || '--:--' }}</td>
+              <td>{{ reg.horaSalida || '--:--' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-normal': reg.estado === 'Normal',
+                  'badge-tardia': reg.estado === 'Tardía',
+                  'badge-anticipada': reg.estado === 'Salida Anticipada',
+                  'badge-justificada': reg.estado === 'Ausencia Justificada',
+                  'badge-ausente': reg.estado === 'Ausencia Injustificada'
+                }">
+                  {{ reg.estado }}
+                  @if (reg.minutosTardia > 0) { <span>(+{{ reg.minutosTardia }}m)</span> }
+                  @if (reg.minutosSalidaAnticipada > 0) { <span>(-{{ reg.minutosSalidaAnticipada }}m)</span> }
+                </span>
+              </td>
+              <td class="celda-auditoria">
+                @if (reg.justificacion) {
+                  <span>{{ reg.justificacion }}</span>
+                } @else {
+                  <span class="texto-gris">Sin observaciones</span>
+                }
+                @if (reg.ajustadoPor) {
+                  <small class="texto-auditoria">Editado por: {{ reg.ajustadoPor }}</small>
+                }
+              </td>
+              <td>
+                <button class="btn-ajustar" (click)="abrirAjuste(reg)" title="Ajuste manual RR.HH.">
+                  ✏️ Ajustar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="9" class="sin-datos">No se encontraron marcas con los filtros seleccionados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  
+  @if (vistaActiva === 'resumen') {
+    <div class="tabla-contenedor">
+      <div class="banner-planilla">
+        <span>💡 <strong>Integración con Nómina:</strong> Las ausencias injustificadas aplican deducción automática y las horas extra validadas se suman al pago mensual.</span>
+      </div>
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Departamento</th>
+            <th>Días Laborados</th>
+            <th>Tardías</th>
+            <th>Ausencias Just.</th>
+            <th>Ausencias Injust.</th>
+            <th>Horas Trabajadas</th>
+            <th>Horas Extra Valid.</th>
+            <th>Impacto en Planilla</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (res of resumenMensual; track res.empleadoId) {
+            <tr>
+              <td><strong>{{ res.nombreEmpleado }}</strong></td>
+              <td>{{ res.departamento }}</td>
+              <td>{{ res.diasLaborados }} días</td>
+              <td>{{ res.tardias }}</td>
+              <td>{{ res.ausenciasJustificadas }}</td>
+              <td>
+                <span [class.texto-rojo]="res.ausenciasInjustificadas > 0">
+                  {{ res.ausenciasInjustificadas }}
+                </span>
+              </td>
+              <td><strong>{{ res.horasTrabajadas }} hrs</strong></td>
+              <td><span class="badge badge-normal">+{{ res.horasExtraValidadas }} hrs</span></td>
+              <td>
+                @if (res.aplicaDeduccionPlanilla) {
+                  <span class="badge badge-ausente">⚠️ Aplica Deducción</span>
+                } @else if (res.horasExtraValidadas > 0) {
+                  <span class="badge badge-justificada">💰 Pago Horas Extra</span>
+                } @else {
+                  <span class="badge badge-normal">✔ Sin Rebajos</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+ 
+  @if (registroEditando) {
+    <div class="modal-fondo">
+      <div class="modal-caja">
+        <h3>Ajuste Manual de Asistencia (RR.HH.)</h3>
+        <p class="modal-sub">Colaborador: <strong>{{ registroEditando.nombreEmpleado }}</strong> · Fecha: {{ registroEditando.fecha }}</p>
+
+        <div class="modal-grid">
+          <div class="campo-modal">
+            <label>Hora de Entrada</label>
+            <input type="time" [(ngModel)]="editEntrada" />
+          </div>
+          <div class="campo-modal">
+            <label>Hora de Salida</label>
+            <input type="time" [(ngModel)]="editSalida" />
+          </div>
+        </div>
+
+        <div class="campo-modal">
+          <label>Clasificación / Estado</label>
+          <select [(ngModel)]="editEstado">
+            <option value="Normal">Normal (Puntual)</option>
+            <option value="Tardía">Tardía</option>
+            <option value="Salida Anticipada">Salida Anticipada</option>
+            <option value="Ausencia Justificada">Ausencia Justificada</option>
+            <option value="Ausencia Injustificada">Ausencia Injustificada</option>
+          </select>
+        </div>
+
+        <div class="campo-modal">
+          <label>Justificación Obligatoria *</label>
+          <textarea 
+            rows="3" 
+            [(ngModel)]="editJustificacion" 
+            placeholder="Indique el motivo del ajuste manual...">
+          </textarea>
+        </div>
+
+        <div class="modal-botones">
+          <button class="btn-cancelar" (click)="cerrarAjuste()">Cancelar</button>
+          <button class="btn-guardar" [disabled]="!editJustificacion.trim()" (click)="guardarAjuste()">
+            Guardar y Registrar Auditoría
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

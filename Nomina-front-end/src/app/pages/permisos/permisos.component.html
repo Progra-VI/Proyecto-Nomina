@@ -1,0 +1,208 @@
+<div class="modulo-permisos">
+ 
+  <div class="cabecera-superior">
+    <div>
+      <h2>📋 Módulo de Permisos y Licencias</h2>
+      <p class="subtitulo">Gestión de solicitudes con y sin goce de salario, validación de traslapes y rebajos automáticos.</p>
+    </div>
+    <button class="btn-nuevo" (click)="abrirNuevaSolicitud()">+ Nueva Solicitud</button>
+  </div>
+
+  @if (mensajeAlerta) {
+    <div class="alerta-notif">{{ mensajeAlerta }}</div>
+  }
+
+  
+  <div class="barra-filtros">
+    <div class="campo-filtro">
+      <label>Colaborador</label>
+      <input type="text" [(ngModel)]="filtroEmpleado" (input)="cargarPermisos()" placeholder="Buscar por nombre..." />
+    </div>
+
+    <div class="campo-filtro">
+      <label>Estado</label>
+      <select [(ngModel)]="filtroEstado" (change)="cargarPermisos()">
+        <option value="Todos">Todos los estados</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="Aprobado">Aprobado</option>
+        <option value="Rechazado">Rechazado</option>
+      </select>
+    </div>
+
+    <div class="campo-filtro">
+      <label>Tipo de Permiso</label>
+      <select [(ngModel)]="filtroTipo" (change)="cargarPermisos()">
+        <option value="Todos">Todos los tipos</option>
+        <option value="Médico">Médico</option>
+        <option value="Personal">Personal</option>
+        <option value="Estudio">Estudio</option>
+        <option value="Luto">Luto</option>
+        <option value="Maternidad/Paternidad">Maternidad/Paternidad</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabla-contenedor">
+    <table class="tabla-datos">
+      <thead>
+        <tr>
+          <th>Colaborador</th>
+          <th>Tipo</th>
+          <th>Fechas y Horario</th>
+          <th>Motivo</th>
+          <th>Condición Salarial</th>
+          <th>Estado</th>
+          <th>Aprobador / Observación</th>
+          <th>Acciones Jefatura</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of permisos; track p.id) {
+          <tr>
+            <td>
+              <div class="colab-info">
+                <img [src]="p.avatar" class="avatar" alt="Foto" />
+                <div>
+                  <strong>{{ p.nombreEmpleado }}</strong>
+                  <small>{{ p.departamento }}</small>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-tipo">{{ p.tipo }}</span></td>
+            <td>
+              <div class="fechas-info">
+                <span>{{ p.fechaInicio }} al {{ p.fechaFin }}</span>
+                <small>{{ p.horaInicio }} - {{ p.horaFin }} hrs</small>
+              </div>
+            </td>
+            <td>{{ p.motivo }}</td>
+            <td>
+              @if (p.conGoceSalario) {
+                <span class="badge badge-con-goce">Con Goce</span>
+              } @else {
+                <span class="badge badge-sin-goce">Sin Goce (Rebajo Planilla)</span>
+              }
+            </td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-pendiente': p.estado === 'Pendiente',
+                'badge-aprobado': p.estado === 'Aprobado',
+                'badge-rechazado': p.estado === 'Rechazado'
+              }">
+                {{ p.estado }}
+              </span>
+            </td>
+            <td>
+              @if (p.aprobadoPor) {
+                <div class="aprobado-info">
+                  <strong>{{ p.aprobadoPor }}</strong>
+                  <small>{{ p.observacionJefatura }}</small>
+                </div>
+              } @else {
+                <span class="texto-gris">Pendiente de revisión</span>
+              }
+            </td>
+            <td>
+              @if (p.estado === 'Pendiente') {
+                <button class="btn-revisar" (click)="abrirRevision(p)">Revisar</button>
+              } @else {
+                <span class="texto-gris">Finalizado</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8" class="sin-datos">No se encontraron solicitudes registradas.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL NUEVA SOLICITUD -->
+  @if (mostrarModalNueva) {
+    <div class="modal-fondo">
+      <div class="modal-caja">
+        <h3>Solicitar Nuevo Permiso</h3>
+        <p class="modal-sub">Complete los detalles de su ausencia justificada.</p>
+
+        <div class="campo-modal">
+          <label>Tipo de Permiso</label>
+          <select [(ngModel)]="nuevoTipo">
+            <option value="Médico">Médico (CCSS/Privado)</option>
+            <option value="Personal">Personal</option>
+            <option value="Estudio">Estudio</option>
+            <option value="Luto">Luto</option>
+            <option value="Maternidad/Paternidad">Maternidad/Paternidad</option>
+          </select>
+        </div>
+
+        <div class="modal-grid">
+          <div class="campo-modal">
+            <label>Fecha Inicio</label>
+            <input type="date" [(ngModel)]="nuevaFechaInicio" />
+          </div>
+          <div class="campo-modal">
+            <label>Fecha Fin</label>
+            <input type="date" [(ngModel)]="nuevaFechaFin" />
+          </div>
+        </div>
+
+        <div class="modal-grid">
+          <div class="campo-modal">
+            <label>Hora Inicio</label>
+            <input type="time" [(ngModel)]="nuevaHoraInicio" />
+          </div>
+          <div class="campo-modal">
+            <label>Hora Fin</label>
+            <input type="time" [(ngModel)]="nuevaHoraFin" />
+          </div>
+        </div>
+
+        <div class="campo-modal">
+          <label>Condición Salarial</label>
+          <select [(ngModel)]="nuevoConGoce">
+            <option [ngValue]="true">Con goce de salario</option>
+            <option [ngValue]="false">Sin goce de salario (Aplica deducción en planilla)</option>
+          </select>
+        </div>
+
+        <div class="campo-modal">
+          <label>Motivo del Permiso *</label>
+          <textarea rows="3" [(ngModel)]="nuevoMotivo" placeholder="Describa el motivo..."></textarea>
+        </div>
+
+        <div class="modal-botones">
+          <button class="btn-cancelar" (click)="mostrarModalNueva = false">Cancelar</button>
+          <button class="btn-guardar" [disabled]="!nuevoMotivo.trim()" (click)="guardarSolicitud()">Enviar Solicitud</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  
+  @if (permisoRevision) {
+    <div class="modal-fondo">
+      <div class="modal-caja">
+        <h3>Revisión de Solicitud (Jefatura)</h3>
+        <p class="modal-sub">Colaborador: <strong>{{ permisoRevision.nombreEmpleado }}</strong> · {{ permisoRevision.tipo }}</p>
+
+        <div class="detalle-revision">
+          <p><strong>Motivo:</strong> {{ permisoRevision.motivo }}</p>
+          <p><strong>Período:</strong> {{ permisoRevision.fechaInicio }} al {{ permisoRevision.fechaFin }} ({{ permisoRevision.horaInicio }} - {{ permisoRevision.horaFin }})</p>
+          <p><strong>Condición:</strong> {{ permisoRevision.conGoceSalario ? 'Con Goce de Salario' : 'Sin Goce de Salario (Generará rebajo)' }}</p>
+        </div>
+
+        <div class="campo-modal">
+          <label>Observaciones de la Jefatura</label>
+          <textarea rows="3" [(ngModel)]="obsJefatura" placeholder="Ingrese comentarios o justificación de la decisión..."></textarea>
+        </div>
+
+        <div class="modal-botones">
+          <button class="btn-rechazar" (click)="resolver(false)">Rechazar</button>
+          <button class="btn-aprobar" (click)="resolver(true)">Aprobar Permiso</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
