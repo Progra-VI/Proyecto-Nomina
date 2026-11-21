@@ -1,33 +1,48 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>NóminaPro 2026</h2>
-    <p class="subtitle">Inicie sesión para acceder al sistema corporativo</p>
+<div class="pagina-login">
+  <div class="caja-login">
+    <div class="cabecera-login">
+      <h1 class="titulo-sistema">Sistema de Gestión de Nómina y Recursos Humanos</h1>
+      <p class="subtitulo-sistema">Bienvenido/a — Inicia sesión para continuar</p>
+    </div>
 
-    @if (error) {
-      <div class="alert-error">{{ error }}</div>
-    }
-
-    <form (submit)="$event.preventDefault(); onLogin()">
-      <div class="form-group">
-        <label>Correo Electrónico</label>
-        <input type="email" [(ngModel)]="email" name="email" placeholder="correo@nominapro.com" required />
+    <form [formGroup]="loginForm" (ngSubmit)="ingresar()" class="formulario">
+      <div class="grupo-campo">
+        <label for="correo">Correo Electrónico</label>
+        <input 
+          type="email" 
+          id="correo"
+          formControlName="correo" 
+          placeholder="correo@tuempresa.cr"
+          class="entrada"
+        />
       </div>
 
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required />
+      <div class="grupo-campo">
+        <label for="contrasena">Contraseña</label>
+        <input 
+          type="password" 
+          id="contrasena"
+          formControlName="contrasena" 
+          placeholder="Escribe tu contraseña"
+          class="entrada"
+        />
       </div>
 
-      <button type="submit" class="btn-primary">Iniciar Sesión</button>
+      <button 
+        type="submit" 
+        class="boton-ingresar"
+        [disabled]="loginForm.invalid || cargando"
+      >
+        {{ cargando ? 'Ingresando...' : 'Ingresar al Sistema' }}
+      </button>
+
+      @if(error) {
+        <p class="mensaje-error" style="color: #dc3545; font-size: 14px; margin-top: 10px; text-align: center; font-weight: 500;">
+          {{ error }}
+        </p>
+      }
     </form>
 
-    <div class="access-rapido">
-      <p>Acceso rápido de prueba por Rol:</p>
-      <div class="btn-roles">
-        <button (click)="iniciarComo('Empleado')" class="btn-rol empleado">👤 Empleado</button>
-        <button (click)="iniciarComo('Jefatura')" class="btn-rol jefatura">👔 Jefatura</button>
-        <button (click)="iniciarComo('RRHH')" class="btn-rol rrhh">🏢 RR.HH.</button>
-      </div>
-    </div>
+    <p class="pie-login">© 2026 — Gestión de Personal y Nómina · Todos los derechos reservados</p>
   </div>
 </div>

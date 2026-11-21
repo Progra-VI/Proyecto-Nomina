@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
+  imports: [RouterOutlet],
   selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  styleUrl: './app.css',
   templateUrl: './app.html',
-  styleUrl: './app.css'
 })
 export class App {
-  title = 'Nomina-front-end';
+  protected readonly title = signal('Nomina-front-end');
 }

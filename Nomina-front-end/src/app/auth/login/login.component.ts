@@ -1,46 +1,69 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  email = '';
-  password = '';
+  loginForm;
   error = '';
   cargando = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  onLogin(): void {
-    this.authService.login(this.email, this.password).subscribe({
-      next: (user) => {
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.error = 'Credenciales inválidas. Verifique sus datos.';
-      }
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private cdRef: ChangeDetectorRef
+  ) {
+    this.loginForm = this.fb.group({
+      correo: ['', [Validators.required, Validators.email]],
+      contrasena: ['', Validators.required]
     });
   }
 
-  
-  iniciarComo(rol: 'Empleado' | 'Jefatura' | 'RRHH'): void {
-    const mockUser = {
-      id: '101',
-      nombre: `Usuario ${rol}`,
-      email: `${rol.toLowerCase()}@nominapro.com`,
-      rol: rol,
-      departamento: 'Operaciones',
-      token: 'jwt_token_mock'
+  ingresar() {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.cargando = true;
+    this.error = '';
+
+    const { correo, contrasena } = this.loginForm.value;
+    if (!correo || !contrasena) {
+      this.cargando = false;
+      return;
+    }
+
+    const credentials = {
+      correo: correo,
+      password: contrasena
     };
-    localStorage.setItem('usuario', JSON.stringify(mockUser));
-    this.router.navigate(['/dashboard']);
+
+    this.authService.login(credentials).pipe(
+      finalize(() => {
+        this.cargando = false;
+        this.cdRef.detectChanges(); 
+      })
+    ).subscribe({
+      next: (respuesta: any) => {
+        console.log('Login exitoso:', respuesta);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err: any) => {
+        this.error = err.error?.mensaje || err.error?.Mensaje || 'Correo o contraseña incorrectos.';
+        this.cdRef.detectChanges(); 
+        console.error('Error de login:', err);
+      }
+    });
   }
 }
