@@ -1,18 +1,22 @@
-using MongoDB.Driver;
-using Nomina_back_end;
-using Nomina_back_end.Data;
-using Nomina_back_end.Services;
-using Nomina_back_end.Repositories;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
+using Nomina_back_end;
+using Nomina_back_end.Data;
+using Nomina_back_end.Repositories;
+using Nomina_back_end.Services;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+// ---------- Licencia de QuestPDF (PDF de boletas y liquidaciones) ----------
+QuestPDF.Settings.License = LicenseType.Community;
 
+builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+// ---------- Repositorios y Servicios ----------
 builder.Services.AddSingleton<DepartamentoRepository>();
 builder.Services.AddScoped<DepartamentoService>();
 
@@ -53,6 +57,13 @@ builder.Services.AddSingleton<PlanillaRepository>();
 builder.Services.AddSingleton<BoletaRepository>();
 builder.Services.AddScoped<PlanillaService>();
 
+builder.Services.AddSingleton<LiquidacionRepository>();
+builder.Services.AddSingleton<ComprobanteStorage>();
+builder.Services.AddScoped<LiquidacionService>();
+
+builder.Services.AddScoped<AuthService>();
+
+// ---------- Configuración ----------
 var mongoSettings = builder.Configuration
     .GetSection("MongoDB")
     .Get<MongoDbSettings>();
@@ -64,27 +75,31 @@ if (mongoSettings == null ||
     throw new Exception("La configuración de MongoDB no está completa.");
 }
 
-builder.Services.AddSingleton<IMongoClient>(_ =>
-    new MongoClient(mongoSettings.ConnectionString));
+var jwt = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>();
 
-builder.Services.AddHealthChecks()
-    .AddCheck<MongoDbHealthCheck>("mongodb");
-
-builder.Services.AddSingleton(sp =>
-{
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(mongoSettings.DatabaseName);
-});
-
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-builder.Services.AddScoped<AuthService>();
-
-var jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 if (jwt == null || string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
 {
     throw new Exception("La configuración de JWT no está completa (la clave debe tener 32+ caracteres).");
 }
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// ---------- MongoDB ----------
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoSettings.ConnectionString));
+
+builder.Services.AddSingleton(sp =>
+    sp.GetRequiredService<IMongoClient>().GetDatabase(mongoSettings.DatabaseName));
+
+builder.Services.AddHealthChecks()
+    .AddCheck<MongoDbHealthCheck>("mongodb");
+
+// ---------- Seguridad: JWT y CORS ----------
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -106,7 +121,6 @@ builder.Services
             OnMessageReceived = ctx =>
             {
                 var h = ctx.Request.Headers.Authorization.ToString();
-                Console.WriteLine($"JWT recibido: {ctx.Request.Method} {ctx.Request.Path} | header: {h.Length} chars | empieza con: '{(h.Length > 15 ? h[..15] : h)}'");
                 return Task.CompletedTask;
             },
             OnAuthenticationFailed = ctx =>
@@ -120,41 +134,39 @@ builder.Services
                 return Task.CompletedTask;
             }
         };
-
     });
 
 builder.Services.AddAuthorization();
-
-var allowedOrigins = builder.Configuration
-    .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? Array.Empty<string>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins("http://localhost:4200") 
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
 
+await AdminSeeder.Sembrar(app.Services, app.Configuration, app.Logger);
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
 app.UseCors("Frontend");
+
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/api/health/mongodb");
 app.MapControllers();
-
 app.MapGet("/", () => "NominaPro API funcionando");
 
 app.Run();

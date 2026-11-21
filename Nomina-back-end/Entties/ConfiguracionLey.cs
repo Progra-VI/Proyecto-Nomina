@@ -29,6 +29,30 @@ public class TramoRenta
     public decimal Porcentaje { get; set; }
 }
 
+public class TramoDias
+{
+    [BsonElement("meses_desde")]
+    public int MesesDesde { get; set; }
+
+    // null = sin límite superior
+    [BsonElement("meses_hasta")]
+    public int? MesesHasta { get; set; }
+
+    [BsonElement("dias")]
+    [BsonRepresentation(BsonType.Decimal128)]
+    public decimal Dias { get; set; }
+}
+
+public class DiasCesantiaAnio
+{
+    [BsonElement("anios")]
+    public int Anios { get; set; }
+
+    [BsonElement("dias_por_anio")]
+    [BsonRepresentation(BsonType.Decimal128)]
+    public decimal DiasPorAnio { get; set; }
+}
+
 public class ConfiguracionLey
 {
     [BsonId]
@@ -39,6 +63,17 @@ public class ConfiguracionLey
 
     [BsonElement("tramos_renta")]
     public List<TramoRenta> TramosRenta { get; set; } = new();
+
+    // NUEVO
+    [BsonElement("preaviso_tramos")]
+    public List<TramoDias> PreavisoTramos { get; set; } = new();
+
+    [BsonElement("cesantia_menor_un_anio")]
+    public List<TramoDias> CesantiaMenorUnAnio { get; set; } = new();
+
+    // NUEVO
+    [BsonElement("cesantia_por_anio")]
+    public List<DiasCesantiaAnio> CesantiaPorAnio { get; set; } = new();
 
     [BsonElement("fecha_actualizacion")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]

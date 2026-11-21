@@ -16,3 +16,18 @@ public class LoginRespuestaDto
     public string Nombre { get; set; } = string.Empty;
     public string Rol { get; set; } = string.Empty;
 }
+
+public class CambiarPasswordDto
+{
+    [Required]
+    public string PasswordActual { get; set; } = string.Empty;
+
+    [Required, MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+    public string PasswordNueva { get; set; } = string.Empty;
+}
+
+public class RestablecerPasswordDto
+{
+    [Required, MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+    public string PasswordNueva { get; set; } = string.Empty;
+}

@@ -16,8 +16,7 @@
         <div class="separador">Administración</div>
         <a routerLink="/liquidacion" routerLinkActive="activo">📄 Liquidación</a>
         <a routerLink="/planilla" routerLinkActive="activo">💰 Planilla</a>
-        <a routerLink="/empleados" routerLinkActive="activo">👥 Empleados</a>
-        <a routerLink="/catalogos" routerLinkActive="activo">📊 Catálogos</a>
+        <a routerLink="/gestion-general" routerLinkActive="activo">👥 Empleados y Catálogos</a>
       }
     </nav>
 
@@ -45,7 +44,7 @@
           <h3>📝 Permisos</h3>
           <p>Solicitudes con y sin goce de salario</p>
         </div>
-        <div class="tarjeta">
+        <div class="tarjeta" routerLink="/vacaciones" style="cursor: pointer;">
           <h3>🏖️ Vacaciones</h3>
           <p>Saldo disponible y solicitudes</p>
         </div>
@@ -58,12 +57,25 @@
             <h3>💰 Planilla</h3>
             <p>Cálculo, aprobación y boletas de pago</p>
           </div>
-          <div class="tarjeta">
-            <h3>👥 Empleados</h3>
-            <p>Registro y mantenimiento de personal</p>
+          <div class="tarjeta" routerLink="/gestion-general" style="cursor: pointer;">
+            <h3>👥 Empleados y Catálogos</h3>
+            <p>Registro, personal y catálogos generales</p>
           </div>
         }
       </div>
     </section>
   </main>
 </div>
+
+@if (mostrarModal) {
+  <div class="modal-backdrop">
+    <div class="modal-caja">
+      <h2>¡Bienvenido/a!</h2>
+      <p class="nombre-usuario">{{ usuario?.nombre }}</p>
+      <p class="mensaje-bienvenida">Nos alegra tenerte de vuelta en el sistema.</p>
+      <button class="boton-aceptar" (click)="cerrarModal()">
+        Continuar al Sistema
+      </button>
+    </div>
+  </div>
+}

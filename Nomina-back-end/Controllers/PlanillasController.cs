@@ -67,4 +67,17 @@ public class PlanillasController : ControllerBase
         var r = await _service.Pagar(id, UsuarioActualId);
         return r.Ok ? NoContent() : StatusCode(r.Status, new { mensaje = r.Error });
     }
+
+    [HttpGet("{id}/boletas/pdf")]
+    public async Task<IActionResult> BoletasPdf(string id)
+    {
+        var (r, d) = await _service.ObtenerDetalle(id);
+        if (!r.Ok) return StatusCode(r.Status, new { mensaje = r.Error });
+
+        if (d!.Boletas.Count == 0)
+            return BadRequest(new { mensaje = "La planilla aún no tiene boletas: calcúlala primero." });
+
+        var pdf = BoletaPdf.Generar(d.Boletas);
+        return File(pdf, "application/pdf", $"planilla-{d.Planilla.Desde}-{d.Planilla.Hasta}.pdf");
+    }
 }
