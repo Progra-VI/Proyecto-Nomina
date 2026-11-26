@@ -46,6 +46,12 @@ public class UsuarioRepository
     public async Task<List<Usuario>> ObtenerPorJefatura(string jefaturaId) =>
         await _usuarios.Find(u => u.JefaturaDirectaId == jefaturaId).ToListAsync();
 
+    public async Task<List<Usuario>> ObtenerJefaturasActivas() =>
+    await _usuarios.Find(u =>
+        u.Rol == Roles.Jefatura &&
+        u.Estado == EstadosUsuario.Activo
+    ).SortBy(u => u.Nombre).ToListAsync();    
+
     public async Task Crear(Usuario usuario)
     {
         usuario.Id = null;

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AsistenciaService } from '../../core/services/asistencia.service';
 import { AsistenciaRegistro, ResumenMensualAsistencia } from '../../core/models/asistencia.model';
+import { BotonDashboardComponent } from '../../shared/components/boton-dashboard/boton-dashboard.component';
 
 @Component({
   selector: 'app-asistencia',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BotonDashboardComponent],
   templateUrl: './asistencia.component.html',
   styleUrl: './asistencia.component.css'
 })

@@ -2,12 +2,14 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsuarioService } from '../../core/services/usuario.service';
+import { UsuarioRespuesta } from '../../core/models/usuario.model';
 import { CatalogoService, TipoCatalogoApi } from '../../core/services/catalogo.service';
+import { BotonDashboardComponent } from '../../shared/components/boton-dashboard/boton-dashboard.component';
 
 @Component({
   selector: 'app-gestion-general',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BotonDashboardComponent],
   templateUrl: './gestion-general.component.html',
   styleUrls: ['./gestion-general.component.css']
 })
@@ -25,6 +27,7 @@ export class GestionGeneralComponent implements OnInit {
   configuracionLey: any = null;
   catalogoSeleccionadoTipo: 'todos' | TipoCatalogoApi = 'todos';
   tiposCatalogoFiltro: { key: TipoCatalogoApi; label: string }[] = [];
+  jefaturas: UsuarioRespuesta[] = [];
 
   editandoCatalogoId: string | null = null;
   editandoTipoKey: TipoCatalogoApi | null = null;
@@ -44,6 +47,7 @@ export class GestionGeneralComponent implements OnInit {
     this.inicializarFormularios();
     this.cargarDepartamentos();
     this.cargarUsuarios();
+    this.cargarJefaturas();
   }
 
   inicializarFormularios(): void {
@@ -84,6 +88,28 @@ export class GestionGeneralComponent implements OnInit {
       pagaCesantia: [false],
       clave: [''],
       valor: ['']
+    });
+
+    // Validación dinámica de la jefatura directa según el rol.
+    const rolControl = this.usuarioForm.get('rol');
+    const jefaturaControl = this.usuarioForm.get('jefaturaDirectaId');
+
+    const actualizarValidacionJefatura = (rol: string) => {
+      if (rol === 'Empleado') {
+        jefaturaControl?.setValidators([Validators.required]);
+      } else {
+        jefaturaControl?.clearValidators();
+      }
+
+      jefaturaControl?.updateValueAndValidity();
+    };
+
+    // Aplicar validación inicial.
+    actualizarValidacionJefatura(rolControl?.value);
+
+    // Actualizar cuando cambie el rol.
+    rolControl?.valueChanges.subscribe(rol => {
+      actualizarValidacionJefatura(rol);
     });
   }
 
@@ -208,6 +234,33 @@ export class GestionGeneralComponent implements OnInit {
     this.empleados = [];
   }
 
+  cargarJefaturas(): void {
+  this.usuarioService.obtenerJefaturasDisponibles().subscribe({
+    next: (data: any) => {
+      this.jefaturas = this.extraerLista(data);
+      this.cdr.detectChanges();
+      console.log('Jefaturas disponibles:', this.jefaturas);
+    },
+    error: (err) => {
+      console.error('Error al cargar jefaturas:', err);
+      this.jefaturas = [];
+    }
+  });
+}
+
+get jefaturasFiltradas(): UsuarioRespuesta[] {
+  const rol = this.usuarioForm.get('rol')?.value;
+  const departamentoId = this.usuarioForm.get('departamentoId')?.value;
+
+  if (rol === 'Empleado') {
+    return this.jefaturas.filter(
+      j => j.departamentoId === departamentoId
+    );
+  }
+
+  return this.jefaturas;
+}
+
   cargarCatalogos(): void {
     this.catalogoService.obtenerTodosLosCatalogos().subscribe({
       next: (res) => {
@@ -299,10 +352,30 @@ export class GestionGeneralComponent implements OnInit {
 
   guardarUsuario(): void {
     if (this.usuarioForm.invalid) {
-      this.usuarioForm.markAllAsTouched();
-      alert('Por favor completa todos los campos obligatorios (revisa salario mayor a 0 y contraseña de al menos 8 caracteres).');
-      return;
-    }
+    this.usuarioForm.markAllAsTouched();
+
+      const nombresCampos: { [key: string]: string } = {
+        identificacion: 'Identificación',
+        nombre: 'Nombre',
+        correo: 'Correo electrónico',
+        rol: 'Rol',
+        departamentoId: 'Departamento',
+        puesto: 'Puesto',
+        jefaturaDirectaId: 'Jefatura directa',
+        fechaIngreso: 'Fecha de ingreso',
+        salarioBase: 'Salario base',
+        password: 'Contraseña',
+        tipoJornada: 'Tipo de jornada'
+      };
+
+      const camposInvalidos = Object.keys(this.usuarioForm.controls)
+        .filter(campo => this.usuarioForm.get(campo)?.invalid)
+        .map(campo => nombresCampos[campo] || campo);
+
+      alert('Revisa los siguientes campos: ' + camposInvalidos.join(', '));
+
+    return;
+  }
 
     const raw = this.usuarioForm.value;
     const payload = {
@@ -319,6 +392,7 @@ export class GestionGeneralComponent implements OnInit {
         alert('¡Usuario creado con éxito!');
         this.cerrarModal();
         this.cargarUsuarios();
+        this.cargarJefaturas();
       },
       error: (err) => {
         console.error('Error al crear usuario:', err);

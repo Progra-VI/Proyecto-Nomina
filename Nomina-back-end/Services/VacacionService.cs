@@ -242,14 +242,26 @@ public class VacacionService
 
     // ---------- Internos ----------
 
-    private async Task<(Resultado r, DateTime inicio, DateTime fin, int dias)> Validar(
-        Usuario u, VacacionGuardarDto dto, string? excluirId)
+   private async Task<(Resultado r, DateTime inicio, DateTime fin, int dias)> Validar(
+    Usuario u, VacacionGuardarDto dto, string? excluirId)
     {
         if (!FechaValida(dto.FechaInicio) || !FechaValida(dto.FechaFin))
             return (Resultado.Fallo("Fecha inválida."), default, default, 0);
 
         if (string.CompareOrdinal(dto.FechaFin, dto.FechaInicio) < 0)
             return (Resultado.Fallo("La fecha final no puede ser anterior a la inicial."), default, default, 0);
+
+        // Validar que las vacaciones sean para fechas futuras
+        var hoy = HoraCR.ALocal(DateTime.UtcNow).Date;
+
+        var fechaInicio = DateTime.ParseExact(
+            dto.FechaInicio,
+            "yyyy-MM-dd",
+            CultureInfo.InvariantCulture
+        );
+
+        if (fechaInicio <= hoy)
+            return (Resultado.Fallo("Las vacaciones deben solicitarse para fechas futuras."), default, default, 0);
 
         var inicio = HoraCR.AUtc(dto.FechaInicio, "00:00");
         var fin = HoraCR.AUtc(dto.FechaFin, "00:00").AddDays(1);

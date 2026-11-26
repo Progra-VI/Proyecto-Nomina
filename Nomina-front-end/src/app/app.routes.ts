@@ -34,6 +34,16 @@ export const routes: Routes = [
         canActivate: [RolGuard],
         data: { roles: ['Empleado', 'Jefatura', 'RRHH'] }
       },
+
+      {
+        path: 'vacaciones',
+        loadComponent: () =>
+          import('./pages/vacaciones/vacaciones.component')
+            .then(m => m.VacacionesComponent),
+        canActivate: [RolGuard],
+        data: { roles: ['Empleado', 'Jefatura', 'RRHH'] }
+      },
+
       {
         path: 'horas-extras',
         loadComponent: () => import('./pages/horas-extras/horas-extras.component').then(m => m.HorasExtrasComponent),

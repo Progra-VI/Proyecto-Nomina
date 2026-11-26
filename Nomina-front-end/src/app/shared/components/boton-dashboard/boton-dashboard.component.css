@@ -1,0 +1,85 @@
+.boton-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 9px 17px;
+  background: #ffffff;
+  color: #344054;
+
+  border: 1px solid #e0e5ed;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.icono-flecha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 29px;
+  height: 29px;
+
+  background-color: #f2f4f7;
+  color: #475467;
+
+  border-radius: 8px;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.texto-boton {
+  white-space: nowrap;
+}
+
+.boton-dashboard:hover {
+  background-color: #f8faff;
+  border-color: #b8c9f5;
+  box-shadow: 0 3px 8px rgba(16, 24, 40, 0.09);
+  transform: translateY(-1px);
+}
+
+.boton-dashboard:hover .icono-flecha {
+  background-color: #e8efff;
+  color: #2457d6;
+  transform: translateX(-2px);
+}
+
+.boton-dashboard:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.boton-dashboard:focus-visible {
+  outline: 3px solid rgba(49, 103, 230, 0.25);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .boton-dashboard {
+    padding: 7px 11px;
+    font-size: 13px;
+    gap: 7px;
+  }
+
+  .icono-flecha {
+    width: 27px;
+    height: 27px;
+  }
+}

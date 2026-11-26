@@ -1,3 +1,5 @@
+<app-boton-dashboard></app-boton-dashboard>
+
 <div class="container mt-4">
   <h2>Panel General de Gestión</h2>
   <p class="text-muted">Administra usuarios, empleados y catálogos desde una sola vista.</p>
@@ -139,7 +141,21 @@
             <div class="col-md-4 mb-3"><label class="form-label">Puesto</label><input type="text" class="form-control" formControlName="puesto"></div>
           </div>
           <div class="row">
-            <div class="col-md-4 mb-3"><label class="form-label">Jefatura Directa ID</label><input type="text" class="form-control" formControlName="jefaturaDirectaId"></div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Jefatura Directa</label>
+            
+              <select class="form-select" formControlName="jefaturaDirectaId">
+                <option [ngValue]="null">Sin jefatura directa</option>
+            
+                <option *ngFor="let jefatura of jefaturasFiltradas" [ngValue]="jefatura.id">
+                  {{ jefatura.nombre }} - {{ jefatura.puesto }}
+                </option>
+              </select>
+            
+              <small class="text-muted" *ngIf="usuarioForm.get('rol')?.value === 'Empleado'">
+                Selecciona la jefatura de su departamento.
+              </small>
+            </div>
             <div class="col-md-4 mb-3"><label class="form-label">Fecha Ingreso</label><input type="date" class="form-control" formControlName="fechaIngreso"></div>
             <div class="col-md-4 mb-3"><label class="form-label">Salario Base</label><input type="number" class="form-control" formControlName="salarioBase"></div>
           </div>

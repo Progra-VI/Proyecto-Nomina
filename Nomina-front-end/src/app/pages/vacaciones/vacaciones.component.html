@@ -1,0 +1,385 @@
+<app-boton-dashboard></app-boton-dashboard>
+
+<div class="modulo-vacaciones">
+
+  
+  <header class="encabezado">
+    <div>
+      <h2> 🏖️ Gestión de Vacaciones</h2>
+      <p>Consulta y administración de solicitudes de vacaciones</p>
+    </div>
+
+    @if (puedeCrear) {
+      <button class="btn-primary" (click)="abrirNuevaSolicitud()">
+        + Nueva solicitud
+      </button>
+    }
+  </header>
+
+  
+  @if (mensajeAlerta) {
+    <div class="alerta" [class.alerta-error]="tipoAlerta === 'error'">
+      {{ mensajeAlerta }}
+      <button class="cerrar-alerta" (click)="mensajeAlerta = ''">×</button>
+    </div>
+  }
+
+  
+  <section class="seccion-saldo">
+    <div class="titulo-seccion">
+      <h3>Mi saldo de vacaciones</h3>
+      @if (saldo) {
+        <span>Fecha de ingreso: {{ saldo.fechaIngreso }}</span>
+      }
+    </div>
+
+    @if (saldo) {
+      <div class="tarjetas-saldo">
+
+        <article class="tarjeta-saldo acumulado">
+          <span class="etiqueta">Acumulado</span>
+          <strong>{{ saldo.acumulado | number:'1.0-2' }}</strong>
+          <small>días generados</small>
+        </article>
+
+        <article class="tarjeta-saldo disfrutado">
+          <span class="etiqueta">Disfrutado</span>
+          <strong>{{ saldo.disfrutado | number:'1.0-2' }}</strong>
+          <small>días aprobados</small>
+        </article>
+
+        <article class="tarjeta-saldo pendiente">
+          <span class="etiqueta">Pendiente</span>
+          <strong>{{ saldo.pendiente | number:'1.0-2' }}</strong>
+          <small>días en revisión</small>
+        </article>
+
+        <article class="tarjeta-saldo disponible">
+          <span class="etiqueta">Disponible</span>
+          <strong>{{ saldo.disponible | number:'1.0-2' }}</strong>
+          <small>días disponibles para solicitar</small>
+        </article>
+
+      </div>
+    } @else {
+      <div class="mensaje-vacio">
+        No se pudo cargar la información del saldo.
+      </div>
+    }
+  </section>
+
+  
+  <section class="seccion-solicitudes">
+
+    <div class="titulo-seccion">
+      <div>
+        <h3>Solicitudes de vacaciones</h3>
+        <p>Consulta el estado y seguimiento de las solicitudes</p>
+      </div>
+    </div>
+
+    
+    <div class="panel-filtros">
+
+      <div class="campo-filtro">
+        <label for="filtroEstado">Estado</label>
+        <select id="filtroEstado" [(ngModel)]="filtroEstado">
+          <option value="Todos">Todos</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Aprobada">Aprobada</option>
+          <option value="Rechazada">Rechazada</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtroDesde">Desde</label>
+        <input
+          id="filtroDesde"
+          type="date"
+          [(ngModel)]="filtroDesde">
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtroHasta">Hasta</label>
+        <input
+          id="filtroHasta"
+          type="date"
+          [(ngModel)]="filtroHasta">
+      </div>
+
+      <div class="acciones-filtro">
+        <button class="btn-primary" (click)="aplicarFiltros()">
+          Filtrar
+        </button>
+        <button class="btn-secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+
+    
+    <div class="tabla-contenedor">
+
+      @if (cargando) {
+        <div class="mensaje-vacio">Cargando solicitudes...</div>
+      } @else if (vacaciones.length === 0) {
+        <div class="mensaje-vacio">
+          No hay solicitudes de vacaciones para mostrar.
+        </div>
+      } @else {
+
+        <table class="tabla-vacaciones">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Periodo solicitado</th>
+              <th>Días</th>
+              <th>Motivo</th>
+              <th>Estado</th>
+              <th>Aprobador</th>
+              <th>Observación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (v of vacaciones; track v.id) {
+              <tr>
+
+                <td>
+                  <div class="colaborador">
+                    @if (v.fotoUrl) {
+                      <img
+                        class="avatar"
+                        [src]="v.fotoUrl"
+                        [alt]="v.nombreEmpleado">
+                    } @else {
+                      <div class="avatar avatar-inicial">
+                        {{ v.nombreEmpleado.charAt(0).toUpperCase() }}
+                      </div>
+                    }
+
+                    <span>{{ v.nombreEmpleado }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="periodo">
+                    <span>{{ v.fechaInicio }}</span>
+                    <small>hasta</small>
+                    <span>{{ v.fechaFin }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <strong>{{ v.dias }}</strong>
+                  <small>días</small>
+                </td>
+
+                <td>{{ v.motivo || 'Sin motivo' }}</td>
+
+                <td>
+                  <span class="estado"
+                    [class.estado-pendiente]="v.estado === 'Pendiente'"
+                    [class.estado-aprobada]="v.estado === 'Aprobada'"
+                    [class.estado-rechazada]="v.estado === 'Rechazada'"
+                    [class.estado-cancelada]="v.estado === 'Cancelada'">
+                    {{ v.estado }}
+                  </span>
+                </td>
+
+                <td>{{ v.aprobadorNombre || '—' }}</td>
+
+                <td>{{ v.observacion || '—' }}</td>
+
+                <td>
+                  <div class="acciones-tabla">
+
+                    @if (puedeEditar(v)) {
+                      <button
+                        class="btn-accion btn-editar"
+                        (click)="abrirEdicion(v)">
+                        Editar
+                      </button>
+                    }
+
+                    @if (puedeCancelar(v)) {
+                      <button
+                        class="btn-accion btn-cancelar"
+                        (click)="cancelarSolicitud(v)">
+                        Cancelar
+                      </button>
+                    }
+
+                    @if (puedeAprobar(v)) {
+                      <button
+                        class="btn-accion btn-revisar"
+                        (click)="abrirRevision(v)">
+                        Revisar
+                      </button>
+                    }
+
+                    @if (!puedeEditar(v) && !puedeCancelar(v) && !puedeAprobar(v)) {
+                      <span class="sin-acciones">—</span>
+                    }
+
+                  </div>
+                </td>
+
+              </tr>
+            }
+          </tbody>
+        </table>
+
+      }
+
+    </div>
+  </section>
+
+  
+  @if (mostrarModalNueva) {
+    <div class="modal-overlay">
+      <div class="modal-contenido">
+
+        <div class="modal-encabezado">
+          <div>
+            <h3>
+              {{ solicitudSeleccionada ? 'Editar solicitud' : 'Nueva solicitud de vacaciones' }}
+            </h3>
+            <p>Complete la información del periodo solicitado</p>
+          </div>
+
+          <button class="btn-cerrar" (click)="cerrarModalNueva()">×</button>
+        </div>
+
+        <div class="formulario">
+
+          <div class="campo">
+            <label for="fechaInicio">Fecha de inicio</label>
+            <input
+              id="fechaInicio"
+              type="date"
+              [(ngModel)]="fechaInicio">
+          </div>
+
+          <div class="campo">
+            <label for="fechaFin">Fecha de finalización</label>
+            <input
+              id="fechaFin"
+              type="date"
+              [(ngModel)]="fechaFin">
+          </div>
+
+          <div class="campo">
+            <label for="motivo">Motivo (opcional)</label>
+            <textarea
+              id="motivo"
+              rows="3"
+              maxlength="250"
+              [(ngModel)]="motivo"
+              placeholder="Indique el motivo de su solicitud">
+            </textarea>
+          </div>
+
+          @if (saldo) {
+            <div class="resumen-disponible">
+              <span>Saldo disponible actual</span>
+              <strong>{{ saldo.disponible | number:'1.0-2' }} días</strong>
+            </div>
+          }
+
+        </div>
+
+        <div class="modal-acciones">
+          <button
+            class="btn-secondary"
+            (click)="cerrarModalNueva()">
+            Cerrar
+          </button>
+
+          <button
+            class="btn-primary"
+            [disabled]="!fechaInicio || !fechaFin"
+            (click)="solicitudSeleccionada ? guardarEdicion() : guardarSolicitud()">
+            {{ solicitudSeleccionada ? 'Guardar cambios' : 'Enviar solicitud' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  
+  @if (mostrarModalRevision && solicitudSeleccionada) {
+    <div class="modal-overlay">
+      <div class="modal-contenido">
+
+        <div class="modal-encabezado">
+          <div>
+            <h3>Revisar solicitud</h3>
+            <p>Solicitud de {{ solicitudSeleccionada.nombreEmpleado }}</p>
+          </div>
+
+          <button class="btn-cerrar" (click)="cerrarModalRevision()">×</button>
+        </div>
+
+        <div class="detalle-solicitud">
+          <div>
+            <span>Fecha de inicio</span>
+            <strong>{{ solicitudSeleccionada.fechaInicio }}</strong>
+          </div>
+
+          <div>
+            <span>Fecha de finalización</span>
+            <strong>{{ solicitudSeleccionada.fechaFin }}</strong>
+          </div>
+
+          <div>
+            <span>Días solicitados</span>
+            <strong>{{ solicitudSeleccionada.dias }}</strong>
+          </div>
+
+          <div>
+            <span>Motivo</span>
+            <strong>{{ solicitudSeleccionada.motivo || 'Sin motivo' }}</strong>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="observacion">Observación de jefatura</label>
+          <textarea
+            id="observacion"
+            rows="4"
+            maxlength="250"
+            [(ngModel)]="observacion"
+            placeholder="Escriba una observación. Es obligatoria si rechaza la solicitud.">
+          </textarea>
+        </div>
+
+        <div class="modal-acciones">
+          <button
+            class="btn-secondary"
+            (click)="cerrarModalRevision()">
+            Cerrar
+          </button>
+
+          <button
+            class="btn-rechazar"
+            (click)="rechazarSolicitud()">
+            Rechazar
+          </button>
+
+          <button
+            class="btn-aprobar"
+            (click)="aprobarSolicitud()">
+            Aprobar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

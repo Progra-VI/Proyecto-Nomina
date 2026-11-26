@@ -57,6 +57,7 @@ export class LoginComponent {
     ).subscribe({
       next: (respuesta: any) => {
         console.log('Login exitoso:', respuesta);
+        sessionStorage.setItem('mostrarBienvenida', 'true');
         this.router.navigate(['/dashboard']);
       },
       error: (err: any) => {

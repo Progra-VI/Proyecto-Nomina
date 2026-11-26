@@ -1,0 +1,437 @@
+<app-boton-dashboard></app-boton-dashboard>
+
+<div class="container-fluid pagina-liquidaciones">
+
+  <!-- Encabezado -->
+  <div class="encabezado d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2>📄Gestión de Liquidaciones</h2>
+      <p>Administración de prestaciones y finiquitos laborales.</p>
+    </div>
+
+    <button class="btn btn-primary"
+            (click)="abrirFormulario()">
+      <i class="bi bi-plus-circle me-2"></i>
+      Nueva liquidación
+    </button>
+  </div>
+
+  <!-- Resumen -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="tarjeta-resumen">
+        <span>Total de liquidaciones</span>
+        <h3>{{ liquidaciones.length }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="tarjeta-resumen">
+        <span>En borrador</span>
+        <h3>{{ liquidaciones.filter(l => l.estado === 'Borrador').length }}</h3>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="tarjeta-resumen">
+        <span>Pagadas</span>
+        <h3>{{ liquidaciones.filter(l => l.estado === 'Pagada').length }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listado -->
+  <div class="card shadow-sm">
+    <div class="card-header encabezado-tabla">
+      <div>
+        <h5>Liquidaciones registradas</h5>
+        <small>Consulta y administración de liquidaciones laborales.</small>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Filtros -->
+      <div class="row align-items-end mb-4">
+        <div class="col-md-4">
+          <label class="form-label">Filtrar por estado</label>
+          <select class="form-select"
+                  [(ngModel)]="filtroEstado"
+                  (change)="aplicarFiltro()">
+            <option value="">Todos los estados</option>
+            <option value="Borrador">Borrador</option>
+            <option value="Aprobada">Aprobada</option>
+            <option value="Pagada">Pagada</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100"
+                  (click)="cargarLiquidaciones()">
+            <i class="bi bi-arrow-clockwise me-2"></i>
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- Cargando -->
+      <div *ngIf="cargando" class="mensaje-cargando">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando liquidaciones...</p>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive" *ngIf="!cargando">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Identificación</th>
+              <th>Motivo</th>
+              <th>Fecha de salida</th>
+              <th>Total neto</th>
+              <th>Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let liquidacion of liquidaciones">
+              <td>
+                <strong>{{ liquidacion.nombreEmpleado }}</strong>
+                <small class="d-block text-muted">
+                  {{ liquidacion.puesto }}
+                </small>
+              </td>
+
+              <td>{{ liquidacion.identificacion }}</td>
+
+              <td>{{ liquidacion.motivo }}</td>
+
+              <td>{{ liquidacion.fechaSalida | date:'dd/MM/yyyy' }}</td>
+
+              <td class="monto">
+                {{ liquidacion.totalNeto | currency:'CRC':'₡':'1.2-2' }}
+              </td>
+
+              <td>
+                <span class="badge"
+                      [ngClass]="obtenerClaseEstado(liquidacion.estado)">
+                  {{ liquidacion.estado }}
+                </span>
+              </td>
+
+              <td>
+                <div class="acciones-tabla">
+
+                  <button class="btn btn-sm btn-outline-info"
+                          title="Ver detalle"
+                          (click)="verDetalle(liquidacion)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <button *ngIf="liquidacion.estado === 'Borrador'"
+                          class="btn btn-sm btn-outline-warning"
+                          title="Editar"
+                          (click)="editarLiquidacion(liquidacion)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+
+                  <button *ngIf="liquidacion.estado === 'Borrador'"
+                          class="btn btn-sm btn-outline-danger"
+                          title="Eliminar"
+                          (click)="eliminarLiquidacion(liquidacion)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+
+                  <button *ngIf="liquidacion.estado === 'Borrador'"
+                          class="btn btn-sm btn-success"
+                          title="Aprobar"
+                          (click)="aprobarLiquidacion(liquidacion)">
+                    <i class="bi bi-check-circle"></i>
+                  </button>
+
+                  <button *ngIf="liquidacion.estado === 'Aprobada'"
+                          class="btn btn-sm btn-primary"
+                          title="Registrar pago"
+                          (click)="pagarLiquidacion(liquidacion)">
+                    <i class="bi bi-cash"></i>
+                  </button>
+
+                  <button class="btn btn-sm btn-outline-dark"
+                          title="Descargar PDF"
+                          (click)="descargarPdf(liquidacion)">
+                    <i class="bi bi-file-pdf"></i>
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="liquidaciones.length === 0">
+              <td colspan="7" class="text-center py-5">
+                <i class="bi bi-folder2-open icono-vacio"></i>
+                <p class="mb-0 mt-2">No hay liquidaciones registradas.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal crear / editar -->
+<div class="modal-fondo" *ngIf="mostrarFormulario">
+  <div class="modal-contenido">
+
+    <div class="modal-encabezado">
+      <div>
+        <h4>{{ modoEdicion ? 'Editar liquidación' : 'Nueva liquidación' }}</h4>
+        <p>Complete la información solicitada.</p>
+      </div>
+
+      <button class="btn-cerrar"
+              type="button"
+              (click)="cerrarFormulario()">
+        &times;
+      </button>
+    </div>
+
+    <form (ngSubmit)="guardarLiquidacion()">
+
+      <div class="mb-3" *ngIf="!modoEdicion">
+        <label class="form-label">Empleado *</label>
+
+        <select class="form-select"
+                name="usuarioId"
+                [(ngModel)]="formulario.usuarioId"
+                required>
+          <option value="">Seleccione un empleado</option>
+
+          <option *ngFor="let empleado of empleadosDisponibles"
+                  [value]="empleado.id ?? empleado.Id">
+            {{ empleado.nombre ?? empleado.Nombre }}
+            -
+            {{ empleado.identificacion ?? empleado.Identificacion }}
+          </option>
+        </select>
+
+        <small class="text-muted">
+          Solo se muestran empleados activos sin liquidaciones anteriores.
+        </small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Motivo de liquidación *</label>
+
+        <select class="form-select"
+                name="motivoLiquidacionId"
+                [(ngModel)]="formulario.motivoLiquidacionId"
+                required>
+          <option value="">Seleccione un motivo</option>
+
+          <option *ngFor="let motivo of motivos"
+                  [value]="motivo.id">
+            {{ motivo.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Fecha de salida *</label>
+
+        <input type="date"
+               class="form-control"
+               name="fechaSalida"
+               [(ngModel)]="formulario.fechaSalida"
+               required>
+      </div>
+
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Los montos de la liquidación serán calculados automáticamente por el sistema.
+      </div>
+
+      <div class="modal-acciones">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                (click)="cerrarFormulario()">
+          Cancelar
+        </button>
+
+        <button type="submit"
+                class="btn btn-primary"
+                [disabled]="guardando">
+          <span *ngIf="guardando"
+                class="spinner-border spinner-border-sm me-2"></span>
+
+          {{ guardando ? 'Procesando...' : (modoEdicion ? 'Guardar cambios' : 'Crear liquidación') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-fondo" *ngIf="liquidacionSeleccionada && !mostrarFormulario">
+  <div class="modal-contenido modal-detalle">
+
+    <div class="modal-encabezado">
+      <div>
+        <h4>Detalle de liquidación</h4>
+        <p>{{ liquidacionSeleccionada.nombreEmpleado }}</p>
+      </div>
+
+      <button class="btn-cerrar"
+              type="button"
+              (click)="cerrarDetalle()">
+        &times;
+      </button>
+    </div>
+
+    <div class="datos-empleado">
+      <div>
+        <span>Identificación</span>
+        <strong>{{ liquidacionSeleccionada.identificacion }}</strong>
+      </div>
+
+      <div>
+        <span>Departamento</span>
+        <strong>{{ liquidacionSeleccionada.departamento }}</strong>
+      </div>
+
+      <div>
+        <span>Puesto</span>
+        <strong>{{ liquidacionSeleccionada.puesto }}</strong>
+      </div>
+
+      <div>
+        <span>Fecha de ingreso</span>
+        <strong>{{ liquidacionSeleccionada.fechaIngreso | date:'dd/MM/yyyy' }}</strong>
+      </div>
+
+      <div>
+        <span>Fecha de salida</span>
+        <strong>{{ liquidacionSeleccionada.fechaSalida | date:'dd/MM/yyyy' }}</strong>
+      </div>
+
+      <div>
+        <span>Antigüedad</span>
+        <strong>{{ liquidacionSeleccionada.antiguedad }}</strong>
+      </div>
+
+      <div>
+        <span>Salario base</span>
+        <strong>{{ liquidacionSeleccionada.salarioBase | currency:'CRC':'₡':'1.2-2' }}</strong>
+      </div>
+
+      <div>
+        <span>Motivo</span>
+        <strong>{{ liquidacionSeleccionada.motivo }}</strong>
+      </div>
+    </div>
+
+    <hr>
+
+    <h5 class="titulo-rubros">Ingresos</h5>
+
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Detalle</th>
+            <th class="text-end">Monto</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let rubro of liquidacionSeleccionada.ingresos">
+            <td>{{ rubro.concepto }}</td>
+            <td>{{ rubro.detalle }}</td>
+            <td class="text-end">
+              {{ rubro.monto | currency:'CRC':'₡':'1.2-2' }}
+            </td>
+          </tr>
+
+          <tr *ngIf="liquidacionSeleccionada.ingresos.length === 0">
+            <td colspan="3" class="text-center text-muted">
+              No hay ingresos registrados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h5 class="titulo-rubros">Deducciones</h5>
+
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Detalle</th>
+            <th class="text-end">Monto</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let rubro of liquidacionSeleccionada.deducciones">
+            <td>{{ rubro.concepto }}</td>
+            <td>{{ rubro.detalle }}</td>
+            <td class="text-end">
+              {{ rubro.monto | currency:'CRC':'₡':'1.2-2' }}
+            </td>
+          </tr>
+
+          <tr *ngIf="liquidacionSeleccionada.deducciones.length === 0">
+            <td colspan="3" class="text-center text-muted">
+              No hay deducciones registradas.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="resumen-montos">
+      <div>
+        <span>Total ingresos</span>
+        <strong>
+          {{ liquidacionSeleccionada.totalIngresos | currency:'CRC':'₡':'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Total deducciones</span>
+        <strong>
+          {{ liquidacionSeleccionada.totalDeducciones | currency:'CRC':'₡':'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="total-neto">
+        <span>Total neto a pagar</span>
+        <strong>
+          {{ liquidacionSeleccionada.totalNeto | currency:'CRC':'₡':'1.2-2' }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="modal-acciones">
+      <button class="btn btn-outline-secondary"
+              (click)="cerrarDetalle()">
+        Cerrar
+      </button>
+
+      <button class="btn btn-dark"
+              (click)="descargarPdf(liquidacionSeleccionada)">
+        <i class="bi bi-file-pdf me-2"></i>
+        Descargar PDF
+      </button>
+    </div>
+
+  </div>
+</div>
