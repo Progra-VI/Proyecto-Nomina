@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PermisoService } from '../../core/services/permiso.service';
 import { PermisoSolicitud } from '../../core/models/permiso.model';
+import { BotonDashboardComponent } from '../../shared/components/boton-dashboard/boton-dashboard.component';
 
 @Component({
   selector: 'app-permisos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BotonDashboardComponent],
   templateUrl: './permisos.component.html',
   styleUrl: './permisos.component.css'
 })

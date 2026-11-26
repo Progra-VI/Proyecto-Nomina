@@ -1,25 +1,33 @@
+
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule], 
+  imports: [RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
   usuario: any;
-  mostrarModal: boolean = true;
+  mostrarModal: boolean = false;
 
   constructor(
     private authService: AuthService,
     private router: Router
   ) {
     this.usuario = this.authService.obtenerUsuario();
+
+    this.mostrarModal =
+      sessionStorage.getItem('mostrarBienvenida') === 'true';
+
+    if (this.mostrarModal) {
+      sessionStorage.removeItem('mostrarBienvenida');
+    }
   }
 
   tieneRol(roles: string[]): boolean {
@@ -27,7 +35,7 @@ export class DashboardComponent {
   }
 
   cerrarModal() {
-    this.mostrarModal = false; 
+    this.mostrarModal = false;
   }
 
   salir() {

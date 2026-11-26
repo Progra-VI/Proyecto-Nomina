@@ -25,6 +25,14 @@ public class UsuariosController : ControllerBase
         return Ok(usuarios.Select(ADto));
     }
 
+    [HttpGet("jefaturas-disponibles")]
+    public async Task<ActionResult<List<UsuarioRespuestaDto>>> ObtenerJefaturasDisponibles()
+    {
+        var jefaturas = await _service.ObtenerJefaturasActivas();
+
+        return Ok(jefaturas.Select(ADto));
+    }   
+
     [HttpGet("{id}")]
     public async Task<ActionResult<UsuarioRespuestaDto>> ObtenerPorId(string id)
     {

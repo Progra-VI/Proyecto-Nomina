@@ -19,6 +19,9 @@ public class UsuarioService
 
     public Task<Usuario?> ObtenerPorId(string id) => _repo.ObtenerPorId(id);
 
+    public Task<List<Usuario>> ObtenerJefaturasActivas() =>
+    _repo.ObtenerJefaturasActivas();
+
     public Task<Usuario?> ObtenerPorCorreo(string correo) =>
         _repo.ObtenerPorCorreo(correo.Trim().ToLower());
 
@@ -61,30 +64,78 @@ public class UsuarioService
         return (true, null);
     }
 
+    
     private async Task<string?> Validar(Usuario u, string? idActual)
     {
         if (u.Rol is not (Roles.Empleado or Roles.Jefatura or Roles.RRHH))
             return "Rol inválido.";
 
         var departamento = await _departamentos.ObtenerPorId(u.DepartamentoId);
+
         if (departamento == null)
             return "El departamento indicado no existe.";
 
         var porCorreo = await _repo.ObtenerPorCorreo(u.Correo);
+
         if (porCorreo != null && porCorreo.Id != idActual)
             return "Ya existe un usuario con ese correo.";
 
         var porIdent = await _repo.ObtenerPorIdentificacion(u.Identificacion);
+
         if (porIdent != null && porIdent.Id != idActual)
             return "Ya existe un usuario con esa identificación.";
 
-        if (u.JefaturaDirectaId != null)
+        // Un empleado debe tener una jefatura directa.
+        if (u.Rol == Roles.Empleado &&
+            string.IsNullOrWhiteSpace(u.JefaturaDirectaId))
+        {
+            return "El empleado debe tener una jefatura directa.";
+        }
+
+        // Validar la jefatura seleccionada, si existe.
+        if (!string.IsNullOrWhiteSpace(u.JefaturaDirectaId))
         {
             if (u.JefaturaDirectaId == idActual)
-                return "Un empleado no puede ser su propia jefatura.";
+                return "Un usuario no puede ser su propia jefatura.";
 
             var jefe = await _repo.ObtenerPorId(u.JefaturaDirectaId);
-            if (jefe == null) return "La jefatura indicada no existe.";
+
+            if (jefe == null)
+                return "La jefatura indicada no existe.";
+
+            if (jefe.Rol != Roles.Jefatura)
+                return "El usuario seleccionado debe tener el rol Jefatura.";
+
+            if (jefe.Estado != EstadosUsuario.Activo)
+                return "La jefatura seleccionada está inactiva.";
+
+            // Los empleados deben depender de una jefatura
+            // perteneciente a su mismo departamento.
+            if (u.Rol == Roles.Empleado &&
+                jefe.DepartamentoId != u.DepartamentoId)
+            {
+                return "La jefatura debe pertenecer al mismo departamento del empleado.";
+            }
+
+            // Evitar ciclos en la jerarquía.
+            var jefeId = jefe.Id;
+            var visitados = new HashSet<string>();
+
+            while (!string.IsNullOrWhiteSpace(jefeId))
+            {
+                if (jefeId == idActual)
+                    return "Esta asignación generaría un ciclo en la jerarquía.";
+
+                if (!visitados.Add(jefeId))
+                    return "Se detectó una relación circular en la jerarquía existente.";
+
+                var superior = await _repo.ObtenerPorId(jefeId);
+
+                if (superior == null)
+                    break;
+
+                jefeId = superior.JefaturaDirectaId;
+            }
         }
 
         return null;

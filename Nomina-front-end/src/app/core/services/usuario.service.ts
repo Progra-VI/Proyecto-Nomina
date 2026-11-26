@@ -30,4 +30,10 @@ export class UsuarioService {
   inactivar(id: string): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/inactivar`, {});
   }
+
+  obtenerJefaturasDisponibles(): Observable<UsuarioRespuesta[]> {
+  return this.http.get<UsuarioRespuesta[]>(
+    `${this.apiUrl}/jefaturas-disponibles`
+  );
+}
 }

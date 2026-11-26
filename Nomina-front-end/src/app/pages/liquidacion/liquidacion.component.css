@@ -1,0 +1,336 @@
+
+.pagina-liquidaciones {
+  padding: 2rem;
+  background-color: #f4f6f9;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Encabezado */
+.encabezado {
+  margin-bottom: 1.8rem;
+}
+
+.encabezado h2 {
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.encabezado p {
+  color: #6b7280;
+  margin-bottom: 0;
+}
+
+/* Tarjetas de resumen */
+.tarjeta-resumen {
+  background: #ffffff;
+  padding: 1.4rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #2563eb;
+  height: 100%;
+}
+
+.tarjeta-resumen span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.tarjeta-resumen h3 {
+  color: #1e293b;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0;
+}
+
+/* Tabla */
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.encabezado-tabla {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.3rem 1.5rem;
+}
+
+.encabezado-tabla h5 {
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.encabezado-tabla small {
+  color: #64748b;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #1e293b;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 1rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.9rem 1rem;
+  color: #334155;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.monto {
+  font-weight: 700;
+  color: #15803d !important;
+  white-space: nowrap;
+}
+
+.badge {
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Acciones */
+.acciones-tabla {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.acciones-tabla .btn {
+  min-width: 32px;
+}
+
+/* Cargando y tabla vacía */
+.mensaje-cargando {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+}
+
+.mensaje-cargando p {
+  margin-top: 1rem;
+}
+
+.icono-vacio {
+  font-size: 2.5rem;
+  color: #94a3b8;
+}
+
+/* Modal */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1050;
+  overflow-y: auto;
+}
+
+.modal-contenido {
+  width: 100%;
+  max-width: 600px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.8rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: aparecer 0.2s ease-out;
+}
+
+.modal-detalle {
+  max-width: 850px;
+}
+
+.modal-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.modal-encabezado h4 {
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.modal-encabezado p {
+  color: #64748b;
+  margin-bottom: 0;
+}
+
+.btn-cerrar {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn-cerrar:hover {
+  color: #dc2626;
+}
+
+/* Formularios */
+.form-label {
+  color: #334155;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 0.7rem 0.8rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Datos del empleado */
+.datos-empleado {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1.2rem;
+  border-radius: 10px;
+}
+
+.datos-empleado div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.datos-empleado span {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.datos-empleado strong {
+  color: #1e293b;
+  font-size: 0.92rem;
+}
+
+/* Rubros y montos */
+.titulo-rubros {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 1.3rem 0 0.8rem;
+}
+
+.resumen-montos {
+  background: #f8fafc;
+  padding: 1.2rem;
+  border-radius: 10px;
+  margin-top: 1.3rem;
+}
+
+.resumen-montos div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  color: #475569;
+}
+
+.resumen-montos strong {
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.resumen-montos .total-neto {
+  border-top: 1px solid #cbd5e1;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  color: #15803d;
+  font-weight: 700;
+}
+
+.resumen-montos .total-neto strong {
+  color: #15803d;
+  font-size: 1.2rem;
+}
+
+/* Botones del modal */
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+}
+
+/* Animación */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Adaptación a pantallas pequeñas */
+@media (max-width: 768px) {
+  .pagina-liquidaciones {
+    padding: 1rem;
+  }
+
+  .encabezado {
+    align-items: flex-start !important;
+  }
+
+  .encabezado button {
+    width: 100%;
+  }
+
+  .datos-empleado {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-contenido {
+    padding: 1.2rem;
+  }
+
+  .acciones-tabla {
+    justify-content: flex-start;
+  }
+
+  .modal-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .modal-acciones button {
+    width: 100%;
+  }
+}
