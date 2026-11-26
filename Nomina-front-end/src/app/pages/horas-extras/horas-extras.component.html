@@ -1,0 +1,333 @@
+<div class="modulo-he">
+  <div class="cabecera">
+    <div>
+      <h2>🕒 Módulo de Horas Extras</h2>
+      <p class="subtitulo">
+        Solicitudes, validación contra asistencia, cálculo de recargos, reportes y consolidación por período.
+      </p>
+    </div>
+    <button class="btn-primario" (click)="abrirNueva()">+ Nueva Solicitud</button>
+  </div>
+
+  @if (mensajeExito) {
+    <div class="alerta-exito">{{ mensajeExito }}</div>
+  }
+
+  @if (mensajeError) {
+    <div class="alerta-error">{{ mensajeError }}</div>
+  }
+
+  <div class="tabs-modulo">
+    <button [class.activo]="vistaActiva === 'solicitudes'" (click)="vistaActiva = 'solicitudes'">
+      📋 Solicitudes y Aprobaciones
+    </button>
+    <button [class.activo]="vistaActiva === 'reportes'" (click)="vistaActiva = 'reportes'">
+      📊 Reportes (Empleado / Departamento / Período)
+    </button>
+    <button [class.activo]="vistaActiva === 'periodo'" (click)="vistaActiva = 'periodo'">
+      🗓️ Horas en Período ({{ aprobadasPeriodo.length }})
+    </button>
+  </div>
+
+  <div class="barra-filtros">
+    <div class="campo">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtroDesde" (change)="cargarTodo()" />
+    </div>
+
+    <div class="campo">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtroHasta" (change)="cargarTodo()" />
+    </div>
+
+    @if (vistaActiva === 'solicitudes') {
+      <div class="campo">
+        <label>Estado</label>
+        <select [(ngModel)]="filtroEstado" (change)="cargarSolicitudes()">
+          <option value="Todos">Todos</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Aprobada">Aprobada</option>
+          <option value="Rechazada">Rechazada</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Tipo</label>
+        <select [(ngModel)]="filtroTipoId" (change)="cargarSolicitudes()">
+          <option value="Todos">Todos los tipos</option>
+          @for (t of tipos; track t.id) {
+            <option [value]="t.id">{{ t.nombre }} ({{ t.recargo }}x)</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="campo">
+      <label>ID Departamento</label>
+      <input type="text" [(ngModel)]="filtroDepartamentoId" (change)="cargarTodo()" placeholder="Opcional" />
+    </div>
+
+    <div class="campo">
+      <label>ID Empleado</label>
+      <input type="text" [(ngModel)]="filtroUsuarioId" (change)="cargarTodo()" placeholder="Opcional" />
+    </div>
+
+    <button class="btn-secundario" (click)="limpiarFiltros()">Limpiar</button>
+  </div>
+
+  @if (vistaActiva === 'solicitudes') {
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Colaborador</th>
+            <th>Tipo / Recargo</th>
+            <th>Rango</th>
+            <th>Horas</th>
+            <th>Valor Hora / Monto</th>
+            <th>Justificación</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of solicitudes; track s.id) {
+            <tr>
+              <td><strong>{{ s.fecha }}</strong></td>
+              <td>{{ s.nombreEmpleado }}</td>
+              <td>
+                <span class="badge badge-tipo">{{ s.tipoHoraExtra }}</span>
+                <small class="texto-muted"> · {{ s.recargo }}x</small>
+              </td>
+              <td>{{ s.horaInicio }} - {{ s.horaFin }}</td>
+              <td><strong>{{ s.horas }}h</strong></td>
+              <td>
+                <div><strong>{{ s.monto | number:'1.2-2' }}</strong></div>
+                <small class="texto-muted">Val. hora: {{ s.valorHora | number:'1.2-2' }}</small>
+              </td>
+              <td>
+                <div>{{ s.justificacion }}</div>
+                @if (s.observacion) {
+                  <small class="texto-obs">Obs: {{ s.observacion }}</small>
+                }
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'badge-pendiente': s.estado === 'Pendiente',
+                  'badge-aprobada': s.estado === 'Aprobada',
+                  'badge-rechazada': s.estado === 'Rechazada' || s.estado === 'Cancelada'
+                }">
+                  {{ s.estado }}
+                </span>
+              </td>
+              <td class="acciones-celda">
+                @if (s.estado === 'Pendiente') {
+                  <button class="btn-mini" (click)="abrirEditar(s)">Editar</button>
+                  <button class="btn-mini btn-aprobar" (click)="abrirRevision(s)">Revisar</button>
+                  <button class="btn-mini btn-peligro" (click)="cancelarSolicitud(s)">Cancelar</button>
+                } @else {
+                  <span class="texto-muted">{{ s.aprobadorNombre || 'Resuelta' }}</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="9" class="vacio">
+                {{ cargando ? 'Cargando solicitudes...' : 'No hay solicitudes de horas extras para los filtros seleccionados.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (vistaActiva === 'reportes') {
+    @if (reporte) {
+      <div class="resumen-cards">
+        <div class="card-kpi">
+          <span>Período</span>
+          <strong>{{ reporte.desde || 'Inicio' }} → {{ reporte.hasta || 'Actual' }}</strong>
+        </div>
+        <div class="card-kpi">
+          <span>Total Horas Aprobadas</span>
+          <strong>{{ reporte.totalHoras }} hrs</strong>
+        </div>
+        <div class="card-kpi">
+          <span>Total Monto Aprobado</span>
+          <strong>{{ reporte.totalMonto | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="grid-reportes">
+        <div class="tabla-wrap">
+          <h3 class="titulo-tabla">Por Empleado</h3>
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Solicitudes</th>
+                <th>Horas</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (emp of reporte.porEmpleado; track emp.id) {
+                <tr>
+                  <td>{{ emp.nombre }}</td>
+                  <td>{{ emp.solicitudes }}</td>
+                  <td>{{ emp.horas }}h</td>
+                  <td><strong>{{ emp.monto | number:'1.2-2' }}</strong></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="vacio">Sin datos por empleado.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tabla-wrap">
+          <h3 class="titulo-tabla">Por Departamento</h3>
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Departamento</th>
+                <th>Solicitudes</th>
+                <th>Horas</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dep of reporte.porDepartamento; track dep.id) {
+                <tr>
+                  <td>{{ dep.nombre }}</td>
+                  <td>{{ dep.solicitudes }}</td>
+                  <td>{{ dep.horas }}h</td>
+                  <td><strong>{{ dep.monto | number:'1.2-2' }}</strong></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="vacio">Sin datos por departamento.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+
+  @if (vistaActiva === 'periodo') {
+    <div class="tabla-wrap">
+      <div class="banner-periodo">
+        <span>
+          <strong>Horas extras aprobadas del período ({{ filtroDesde }} al {{ filtroHasta }}):</strong>
+          {{ totalHorasPeriodo }} hrs · Monto acumulado: <strong>{{ totalMontoPeriodo | number:'1.2-2' }}</strong>
+        </span>
+      </div>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Colaborador</th>
+            <th>Tipo</th>
+            <th>Horas</th>
+            <th>Recargo</th>
+            <th>Monto a Pagar</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of aprobadasPeriodo; track item.id) {
+            <tr>
+              <td>{{ item.fecha }}</td>
+              <td>{{ item.nombreEmpleado }}</td>
+              <td>{{ item.tipoHoraExtra }}</td>
+              <td><strong>{{ item.horas }}h</strong></td>
+              <td>{{ item.recargo }}x</td>
+              <td><strong>{{ item.monto | number:'1.2-2' }}</strong></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="vacio">No hay horas extras aprobadas en este período.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (mostrarModalFormulario) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <h3>{{ idEditando ? 'Editar Solicitud de Hora Extra' : 'Registrar Hora Extra' }}</h3>
+        <p class="modal-sub">Las horas serán validadas contra la asistencia real y tu jornada.</p>
+
+        <div class="campo">
+          <label>Tipo de Hora Extra</label>
+          <select [(ngModel)]="formData.tipoHoraExtraId">
+            @for (t of tipos; track t.id) {
+              <option [value]="t.id">{{ t.nombre }} ({{ t.recargo }}x)</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid-2">
+          <div class="campo">
+            <label>Fecha</label>
+            <input type="date" [(ngModel)]="formData.fecha" />
+          </div>
+          <div class="campo">
+            <label>Hora Inicio</label>
+            <input type="time" [(ngModel)]="formData.horaInicio" />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="campo">
+            <label>Hora Fin</label>
+            <input type="time" [(ngModel)]="formData.horaFin" />
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Justificación (mín. 5 caracteres)</label>
+          <textarea rows="3" [(ngModel)]="formData.justificacion" placeholder="Motivo de las horas extras..."></textarea>
+        </div>
+
+        <div class="modal-acciones">
+          <button class="btn-secundario" (click)="cerrarFormulario()">Cancelar</button>
+          <button class="btn-primario" (click)="guardarSolicitud()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (solicitudRevision) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <h3>Resolver Solicitud de Hora Extra</h3>
+        <p class="modal-sub">
+          <strong>{{ solicitudRevision.nombreEmpleado }}</strong> · {{ solicitudRevision.fecha }}
+          ({{ solicitudRevision.horaInicio }} - {{ solicitudRevision.horaFin }}, {{ solicitudRevision.horas }}h)
+        </p>
+
+        <div class="caja-detalle">
+          <p><strong>Tipo:</strong> {{ solicitudRevision.tipoHoraExtra }} ({{ solicitudRevision.recargo }}x)</p>
+          <p><strong>Monto estimado:</strong> {{ solicitudRevision.monto | number:'1.2-2' }}</p>
+          <p><strong>Justificación:</strong> {{ solicitudRevision.justificacion }}</p>
+        </div>
+
+        <div class="campo">
+          <label>Observación (obligatoria si rechazas)</label>
+          <textarea rows="3" [(ngModel)]="observacionRevision" placeholder="Escribe una observación..."></textarea>
+        </div>
+
+        <div class="modal-acciones">
+          <button class="btn-secundario" (click)="cerrarRevision()">Cerrar</button>
+          <button class="btn-peligro" (click)="resolverSolicitud(false)">Rechazar</button>
+          <button class="btn-exito" (click)="resolverSolicitud(true)">Aprobar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
