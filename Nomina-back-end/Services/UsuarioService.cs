@@ -28,6 +28,12 @@ public class UsuarioService
     public async Task<(bool ok, string? error)> Crear(Usuario usuario, string passwordPlano)
     {
         usuario.Correo = usuario.Correo.Trim().ToLower();
+        var identificacion = NormalizarIdentificacion(usuario.Identificacion);
+
+        if (identificacion == null)
+            return (false, "La identificación debe tener el formato #-####-####.");
+
+        usuario.Identificacion = identificacion;
 
         var error = await Validar(usuario, null);
         if (error != null) return (false, error);
@@ -47,6 +53,12 @@ public class UsuarioService
 
         usuario.Id = id;
         usuario.Correo = usuario.Correo.Trim().ToLower();
+        var identificacion = NormalizarIdentificacion(usuario.Identificacion);
+
+        if (identificacion == null)
+            return (false, "La identificación debe tener el formato #-####-####.");
+
+        usuario.Identificacion = identificacion;
 
         var error = await Validar(usuario, id);
         if (error != null) return (false, error);
@@ -168,8 +180,24 @@ public class UsuarioService
     }
 
     public async Task<List<Usuario>> ObtenerEquipo(string jefeId) =>
-        (await _repo.ObtenerPorJefatura(jefeId))
-            .Where(u => u.Estado == EstadosUsuario.Activo)
-            .OrderBy(u => u.Nombre)
-            .ToList();
+      (await _repo.ObtenerPorJefatura(jefeId))
+          .Where(u => u.Estado == EstadosUsuario.Activo)
+          .OrderBy(u => u.Nombre)
+          .ToList();
+
+    private static string? NormalizarIdentificacion(string identificacion)
+    {
+        if (string.IsNullOrWhiteSpace(identificacion))
+            return null;
+
+        var valor = identificacion.Trim();
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(
+            valor, @"^\d{1}-?\d{4}-?\d{4}$"))
+            return null;
+
+        var digitos = valor.Replace("-", "");
+
+        return $"{digitos[0]}-{digitos.Substring(1, 4)}-{digitos.Substring(5, 4)}";
+    }
 }

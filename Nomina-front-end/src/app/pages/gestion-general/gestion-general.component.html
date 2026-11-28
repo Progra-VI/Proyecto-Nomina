@@ -5,15 +5,26 @@
   <p class="text-muted">Administra usuarios, empleados y catálogos desde una sola vista.</p>
   <hr>
 
-  <!-- Menú de Pestañas -->
-  <ul class="nav nav-pills mb-4">
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="seccionActiva === 'usuarios'" (click)="cambiarSeccion('usuarios')">Usuarios</button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="seccionActiva === 'catalogos'" (click)="cambiarSeccion('catalogos')">Catálogos</button>
-    </li>
-  </ul>
+<!-- Menú principal -->
+<ul class="nav nav-pills mb-4">
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="seccionActiva === 'usuarios'"
+      (click)="cambiarSeccion('usuarios')">
+      Usuarios
+    </button>
+  </li>
+
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="seccionActiva === 'catalogos'"
+      (click)="cambiarSeccion('catalogos')">
+      Catálogos
+    </button>
+  </li>
+</ul>
 
   <!-- ================= VISTA 1: USUARIOS ================= -->
   <div *ngIf="seccionActiva === 'usuarios'" class="card p-4 shadow-sm mb-4">
@@ -23,7 +34,8 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-striped table-hover">
+     <div class="table-responsive">
+  <table class="table table-striped table-hover">
         <thead class="table-dark">
           <tr>
             <th>Identificación</th>
@@ -53,29 +65,33 @@
             <td colspan="6" class="text-center text-muted py-4">No hay registros de usuarios disponibles.</td>
           </tr>
         </tbody>
-      </table>
+        </table>
+</div>
     </div>
   </div>
+  
 
   <!-- ================= VISTA 3: CATÁLOGOS ================= -->
   <div *ngIf="seccionActiva === 'catalogos'" class="card p-4 shadow-sm mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-      <h3>Gestión de Catálogos</h3>
 
-      <div class="d-flex align-items-center gap-2">
-        <select
-          class="form-select form-select-sm w-auto"
-          [value]="catalogoSeleccionadoTipo"
-          (change)="catalogoSeleccionadoTipo = $any($event.target).value">
-          <option value="todos">Todos los tipos</option>
-          <option *ngFor="let t of tiposCatalogoFiltro" [value]="t.key">{{ t.label }}</option>
-        </select>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Gestión de Catálogos</h3>
 
-        <button class="btn btn-primary btn-sm" (click)="abrirModal()">+ Nuevo Catálogo</button>
-      </div>
-    </div>
+    <button class="btn btn-primary btn-sm" (click)="abrirModal()">
+      + Nuevo Catálogo
+    </button>
+  </div>
 
-    <div class="table-responsive">
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <button
+      *ngFor="let tipo of tiposCatalogoFiltro"
+      class="btn btn-sm"
+      [class.btn-primary]="catalogoActivo === tipo.key"
+      [class.btn-outline-primary]="catalogoActivo !== tipo.key"
+      (click)="catalogoActivo = tipo.key">
+      {{ tipo.label }}
+    </button>
+  </div>
       <table class="table table-striped table-hover">
         <thead class="table-dark">
           <tr>
@@ -87,9 +103,8 @@
         </thead>
         <tbody>
           <tr
-            *ngFor="let cat of (catalogoSeleccionadoTipo === 'todos'
-              ? catalogos
-              : catalogos.filter(item => item.tipoKey === catalogoSeleccionadoTipo))">
+            *ngFor="let cat of catalogos.filter(item => item.tipoKey === catalogoActivo)"
+            >
             <td>{{ cat.tipoCatalogo }}</td>
             <td>{{ cat.nombre }}</td>
             <td>{{ cat.descripcion }}</td>
@@ -103,15 +118,13 @@
             </td>
           </tr>
           <tr
-            *ngIf="(catalogoSeleccionadoTipo === 'todos'
-              ? catalogos
-              : catalogos.filter(item => item.tipoKey === catalogoSeleccionadoTipo)).length === 0">
+            *ngIf="catalogos.filter(item => item.tipoKey === catalogoActivo).length === 0">
             <td colspan="4" class="text-center text-muted py-4">No hay catálogos registrados.</td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
+
 </div>
 
 <!-- ================= MODAL: NUEVO USUARIO ================= -->
@@ -217,14 +230,17 @@
         <form [formGroup]="catalogoForm" (ngSubmit)="guardarCatalogo()">
           <div class="mb-3">
             <label class="form-label">Tipo de Catálogo</label>
-            <select class="form-select" formControlName="tipoCatalogo">
-              <option value="departamentos">Departamento</option>
-              <option value="feriados">Feriado</option>
-              <option value="motivos-liquidacion">Motivo de liquidación</option>
-              <option value="tipos-hora-extra">Tipo de hora extra</option>
-              <option value="tipos-permiso">Tipo de permiso</option>
-              <option value="parametros">Parámetro</option>
-            </select>
+            <select
+            class="form-select"
+            formControlName="tipoCatalogo"
+            [disabled]="editandoCatalogoId !== null">
+            <option value="departamentos">Departamento</option>
+            <option value="feriados">Feriado</option>
+            <option value="motivos-liquidacion">Motivo de liquidación</option>
+            <option value="tipos-hora-extra">Tipo de hora extra</option>
+            <option value="tipos-permiso">Tipo de permiso</option>
+            <option value="parametros">Parámetro</option>
+          </select>
           </div>
 
           <!-- Campos para PARÁMETROS -->

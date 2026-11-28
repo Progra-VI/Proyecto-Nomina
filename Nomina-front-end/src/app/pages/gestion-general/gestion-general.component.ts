@@ -15,6 +15,7 @@ import { BotonDashboardComponent } from '../../shared/components/boton-dashboard
 })
 export class GestionGeneralComponent implements OnInit {
   seccionActiva: 'usuarios' | 'empleados' | 'catalogos' = 'usuarios';
+  catalogoActivo: TipoCatalogoApi = 'departamentos';
 
   mostrarModalUsuario: boolean = false;
   mostrarModalEmpleado: boolean = false;
@@ -25,9 +26,14 @@ export class GestionGeneralComponent implements OnInit {
   catalogos: any[] = [];
   departamentos: any[] = [];
   configuracionLey: any = null;
-  catalogoSeleccionadoTipo: 'todos' | TipoCatalogoApi = 'todos';
-  tiposCatalogoFiltro: { key: TipoCatalogoApi; label: string }[] = [];
-  jefaturas: UsuarioRespuesta[] = [];
+tiposCatalogoFiltro: { key: TipoCatalogoApi; label: string }[] = [
+  { key: 'departamentos', label: 'Departamentos' },
+  { key: 'tipos-permiso', label: 'Tipos de permiso' },
+  { key: 'tipos-hora-extra', label: 'Tipos de horas extra' },
+  { key: 'motivos-liquidacion', label: 'Motivos de liquidación' },
+  { key: 'feriados', label: 'Feriados' },
+  { key: 'parametros', label: 'Parámetros' }
+];  jefaturas: UsuarioRespuesta[] = [];
 
   editandoCatalogoId: string | null = null;
   editandoTipoKey: TipoCatalogoApi | null = null;
@@ -115,6 +121,7 @@ export class GestionGeneralComponent implements OnInit {
 
   cambiarSeccion(seccion: 'usuarios' | 'empleados' | 'catalogos'): void {
     this.seccionActiva = seccion;
+    
     if (seccion === 'usuarios') this.cargarUsuarios();
     if (seccion === 'empleados') this.cargarEmpleados();
     if (seccion === 'catalogos') this.cargarCatalogos();
@@ -122,6 +129,7 @@ export class GestionGeneralComponent implements OnInit {
 
   abrirModal(): void {
     if (this.seccionActiva === 'usuarios') {
+      
       this.mostrarModalUsuario = true;
       this.usuarioForm.reset({
         rol: 'Empleado',
@@ -141,7 +149,7 @@ export class GestionGeneralComponent implements OnInit {
       this.editandoTipoKey = null;
       this.mostrarModalCatalogo = true;
       this.catalogoForm.reset({
-        tipoCatalogo: 'departamentos',
+        tipoCatalogo: this.catalogoActivo,
         nombre: '',
         descripcion: '',
         fecha: '',
@@ -154,10 +162,12 @@ export class GestionGeneralComponent implements OnInit {
     }
   }
 
-  editarCatalogo(cat: any): void {
-    this.editandoCatalogoId = cat.id ?? null;
-    this.editandoTipoKey = cat.tipoKey ?? null;
-    const raw = cat.raw || {};
+ editarCatalogo(cat: any): void {
+  this.editandoCatalogoId = cat.id ?? null;
+  this.editandoTipoKey = cat.tipoKey ?? null;
+  this.catalogoActivo = cat.tipoKey;
+
+  const raw = cat.raw || {};
 
     this.catalogoForm.patchValue({
       tipoCatalogo: cat.tipoKey || 'departamentos',
@@ -332,17 +342,6 @@ get jefaturasFiltradas(): UsuarioRespuesta[] {
           ...permisos,
           ...parametros
         ];
-
-        const mapaTipos = new Map<TipoCatalogoApi, string>();
-        for (const item of this.catalogos) {
-          if (item.tipoKey && !mapaTipos.has(item.tipoKey)) {
-            mapaTipos.set(item.tipoKey, item.tipoCatalogo);
-          }
-        }
-        this.tiposCatalogoFiltro = Array.from(mapaTipos.entries()).map(([key, label]) => ({
-          key,
-          label
-        }));
 
         this.cdr.detectChanges();
       },
