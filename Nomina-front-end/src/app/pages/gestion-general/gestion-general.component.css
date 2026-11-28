@@ -239,3 +239,97 @@ hr {
     transform: scale(1) translateY(0);
   }
 }
+
+
+/* ================= ENCABEZADOS INTERNOS ================= */
+.card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0;
+}
+
+/* ================= BOTONES DE CATÁLOGOS ================= */
+.catalogo-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.catalogo-tabs .btn {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.catalogo-tabs .btn-outline-primary {
+  color: #475569;
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+}
+
+.catalogo-tabs .btn-outline-primary:hover {
+  color: #0d6efd;
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.catalogo-tabs .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  box-shadow: 0 3px 8px rgba(13, 110, 253, 0.2);
+}
+
+/* ================= BOTONES PRINCIPALES ================= */
+.btn-primary {
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+}
+
+/* ================= MENSAJES SIN REGISTROS ================= */
+.table tbody td.text-muted {
+  color: #94a3b8 !important;
+  font-style: italic;
+  padding: 2rem 1rem;
+}
+
+/* ================= CAMPOS DESHABILITADOS ================= */
+.form-select:disabled,
+.form-control:disabled {
+  background-color: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* ================= DISEÑO RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .card h3 {
+    font-size: 1.1rem;
+  }
+
+  .catalogo-tabs .btn {
+    flex: 1 1 auto;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+}
